@@ -256,6 +256,15 @@ def table(header, rows, widths=None, size=12, bold_last=False, bold_rows=()):
 def note(text):
     P(text, indent=False, align="l", spacing=1.08, size=11, after=8)
 
+FIGDIR = Path(__file__).with_name("figures")
+def image(name, label, width=6.5):
+    if not (FIGDIR / name).exists():
+        return placeholder(label)
+    p = d.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.space_before = Pt(6); p.paragraph_format.keep_with_next = True
+    p.add_run().add_picture(str(FIGDIR / name), width=Inches(width))
+
 def placeholder(label):
     P(f"[{label}]", indent=False, align="c", italic=True, spacing=1.08, after=6)
 
@@ -481,7 +490,7 @@ P("The Input component encompasses the knowledge, software, and hardware require
   "knowledge requirements include the challenges of the current manual health monitoring system as reported by "
   "the respondents; the health programs that the system must support, namely the DOH Expanded Program on "
   "Immunization schedule, the four-visit antenatal care pathway, the Philippine clinical practice guidelines "
-  "for hypertension (Philippine Heart Association–Philippine Society of Hypertension, 2020), and the World "
+  "for hypertension (Ona et al., 2021), and the World "
   "Health Organization’s body mass index cut-offs for Asian populations (WHO Expert Consultation, 2004); the "
   "requirements of the Data Privacy Act of 2012; and the theories that guide the study.")
 P("Two foundational theories anchor this study. The Technology Acceptance Model (Davis, 1989) holds that users "
@@ -645,7 +654,7 @@ H2("SOFTWARE DEVELOPMENT LIFE CYCLE")
 P("The development of the system follows the Prototype Model, an iterative methodology in which a working "
   "version of the system is built, shown to the users, and refined based on their feedback. Each cycle "
   "produced a working version that was reviewed before the next one began, as illustrated in Figure 2.")
-placeholder("Insert the Prototype Development Cycle diagram from the original manuscript")
+image("figure2_prototype.png", "Insert the Prototype Development Cycle diagram")
 cap("Figure", "Prototype Development Cycle")
 for phase, text in [
     ("Phase 1: Requirements Gathering.", f"The researchers identified the existing problems in the barangays’ "
@@ -911,7 +920,8 @@ P(f"Guided directly by the findings of Problem 1, the researchers designed and d
   f"Status Monitoring System following the Input–Process–Output framework and the Prototype Model described in "
   f"Chapter II. Table {trace_num} traces each identified challenge to the feature that addresses it. The "
   f"subsections that follow present the architecture, the clinical rules, the database, the user roles, and "
-  f"each module of the system with its corresponding screen.")
+  f"each module of the system with its corresponding screen. The screens shown in the plates contain fictional "
+  f"sample residents entered for demonstration, not actual patient records.")
 cap("Table", "Challenges Identified and the Corresponding Features of the BHSMS")
 table(["Challenge Identified (Problem 1)", "BHSMS Feature (Problem 2)"], [
     [f"Paper records are difficult to organize ({m1[0]}); recording is time-consuming (30.36%)",
@@ -969,7 +979,7 @@ P(f"Figure 4 shows the workflow of a vital-sign encounter. The health worker sel
   f"deciding the result. A fever raises a Normal severity to Elevated, and only a hypertensive crisis makes a "
   f"referral mandatory. The accepted ranges of each reading are enforced by the database to reject impossible "
   f"values.")
-placeholder("Insert diagram: Select resident → Enter 7 readings → Live evaluation → Save → Stored offline → Synced to cloud")
+image("figure4_triage.png", "Insert the triage workflow diagram", width=5.0)
 cap("Figure", "Vital-Sign Triage Workflow")
 cap("Table", "Clinical Thresholds Applied by the System")
 table(["Measure", "Threshold", "Classification / Flag", "Severity"], [
@@ -994,7 +1004,7 @@ P("Figure 5 presents the entity-relationship diagram. The profiles table stores 
   "counts per epidemiological week, and the audit_logs table records every action for compliance with the Data "
   "Privacy Act of 2012. Every table is protected by Row-Level Security policies that restrict reading and "
   "writing by role.")
-placeholder("Insert ERD: profiles, households, residents, vital_signs, maternal_records, antenatal_visits, immunizations, disease_surveillance_reports, audit_logs")
+image("figure5_erd.png", "Insert the ERD")
 cap("Figure", "Entity-Relationship Diagram of the BHSMS")
 
 H4("d. User Roles and Access")
@@ -1065,11 +1075,12 @@ MODULES = [
      "create accounts, assign one of the five roles, and grant or remove individual modules for each user.",
      ["User Accounts and Module Permissions"]),
 ]
+PLATE_FILES = sorted(f.name for f in FIGDIR.glob("plate*.png")) + [""] * 12
 for head, text, plates in MODULES:
     H4(head)
     P(text)
     for title in plates:
-        placeholder(f"Insert screenshot — {title}")
+        image(PLATE_FILES[COUNT["Plate"]], f"Insert screenshot — {title}")
         cap("Plate", title)
 
 H4("o. Summary of Security and Data-Integrity Measures")
@@ -1221,7 +1232,7 @@ for ref in [
     "Garcia, M. R. Q., Jimenez, K. L. D., Simacon, R. R. O., Vito, M. C. C., & Yabut, E. R. (2021). B-Health: A framework for mobile and web application for barangay health center in the Municipality of Laguna. In 2021 1st International Conference in Information and Computing Research (iCORE).",
     "International Organization for Standardization. (2018). ISO 9241-11:2018 Ergonomics of human-system interaction — Part 11: Usability: Definitions and concepts. https://www.iso.org/standard/63500.html",
     "Likert, R. (1932). A technique for the measurement of attitudes. Archives of Psychology, 22(140), 1–55.",
-    "Philippine Heart Association–Philippine Society of Hypertension. (2020). 2020 clinical practice guidelines for the management of hypertension in the Philippines.",
+    "Ona, D. I. D., Jimeno, C. A., Jasul, G. V., Jr., et al. (2021). Executive summary of the 2020 clinical practice guidelines for the management of hypertension in the Philippines. The Journal of Clinical Hypertension, 23(9), 1637–1650. https://doi.org/10.1111/jch.14335",
     "Republic of the Philippines. (2012). Republic Act No. 10173: Data Privacy Act of 2012. https://lawphil.net/statutes/repacts/ra2012/ra_10173_2012.html",
     "Sumaylo, D. J. F. (2013). Information delivery in the provision of barangay health services in Barangay Dawis, Digos City, Philippines.",
     "Supabase. (2026). Row level security. Supabase Docs. https://supabase.com/docs/guides/database/postgres/row-level-security",
