@@ -108,6 +108,19 @@ for ref in body.iter(qn("w:footerReference")):
 
 FONT = "Courier New"
 GRID = next(s for s in d.styles if s.type == WD_STYLE_TYPE.TABLE and s.style_id == "TableGrid")
+
+def boxed(t):
+    # QueUA's TableGrid style draws no lines, so every data table gets explicit single borders
+    tblPr = t._tbl.tblPr
+    for old in tblPr.findall(qn("w:tblBorders")):
+        tblPr.remove(old)
+    borders = OxmlElement("w:tblBorders")
+    for edge in ("top", "left", "bottom", "right", "insideH", "insideV"):
+        el = OxmlElement(f"w:{edge}")
+        for k, v in (("val", "single"), ("sz", "6"), ("space", "0"), ("color", "000000")):
+            el.set(qn(f"w:{k}"), v)
+        borders.append(el)
+    insert_before(tblPr, borders, ("shd", "tblLayout", "tblCellMar", "tblLook", "tblCaption", "tblDescription"))
 normal = d.styles["Normal"]
 normal.font.name = FONT
 for attr in ("w:eastAsia", "w:cs"):
@@ -230,6 +243,7 @@ def cap(kind, title):
 def table(header, rows, widths=None, size=12, bold_last=False, bold_rows=()):
     t = d.add_table(rows=1, cols=len(header))
     t.style = GRID
+    boxed(t)
     t.alignment = WD_TABLE_ALIGNMENT.CENTER
     for i, h in enumerate(header):
         t.rows[0].cells[i].text = h
@@ -237,6 +251,13 @@ def table(header, rows, widths=None, size=12, bold_last=False, bold_rows=()):
         cells = t.add_row().cells
         for i, v in enumerate(r):
             cells[i].text = str(v)
+    if widths:
+        # grid widths too: LibreOffice and WPS ignore per-cell widths and would split columns equally
+        t.autofit = False
+        for i, w in enumerate(widths):
+            t.columns[i].width = Inches(w)
+    for row in t.rows:
+        cant = OxmlElement("w:cantSplit"); row._tr.get_or_add_trPr().append(cant)
     last = len(t.rows) - 1
     for ri, row in enumerate(t.rows):
         for ci, c in enumerate(row.cells):
@@ -511,7 +532,7 @@ P("The Output component is the Barangay Health Status Monitoring System, a web-b
   "and user-friendliness. The feedback arrow in Figure 1 indicates that the evaluation results inform the "
   "further refinement of the system.")
 
-ipo = d.add_table(rows=2, cols=3); ipo.style = GRID; ipo.alignment = WD_TABLE_ALIGNMENT.CENTER
+ipo = d.add_table(rows=2, cols=3); ipo.style = GRID; boxed(ipo); ipo.alignment = WD_TABLE_ALIGNMENT.CENTER
 for i, (head, lines) in enumerate([
     ("INPUT", ["Knowledge requirements: challenges of the manual system; DOH EPI schedule; 4-visit ANC; "
                "PH hypertension CPG; WHO Asia-Pacific BMI cut-offs; RA 10173; TAM; ISO 9241-11",
@@ -953,7 +974,7 @@ P("The BHSMS is a web-based application organized into four layers, as shown in 
   "When the administrator runs synchronization, the local records are bundled into a backup file uploaded to "
   "the cloud, and resident and user records are written to their database tables; if the upload fails, the "
   "data remain on the workstation until the next synchronization.")
-arch = d.add_table(rows=2, cols=4); arch.style = GRID; arch.alignment = WD_TABLE_ALIGNMENT.CENTER
+arch = d.add_table(rows=2, cols=4); arch.style = GRID; boxed(arch); arch.alignment = WD_TABLE_ALIGNMENT.CENTER
 for i, (head, text) in enumerate([
     ("1. Pages", "Next.js App Router: residents, vitals, maternal, immunizations, referral, analytics, operations, users"),
     ("2. Services", "ClinicalService, AnalyticsService, evaluateVitals(), SupabaseSyncService"),
