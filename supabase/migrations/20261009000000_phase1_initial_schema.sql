@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- Barangay Health Status Monitoring System (BHSMS)
 -- Phase 1: Relational Schema & Row-Level Security
--- Targeted Barangays: Palaquio, Tabiog, Babangcag (Lagangilang, Abra)
+-- Targeted Barangays: Palaquio, Tabiog, Babangcag (Bucay, Abra)
 -- ==============================================================================
 
 -- 1. EXTENSIONS

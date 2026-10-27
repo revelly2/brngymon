@@ -5,7 +5,7 @@
 
 ### 1. Executive Summary & Problem Analysis
 
-Primary healthcare at the grassroots level serves as the frontline entry point for essential community services, including immunization, maternal care, and communicable/non-communicable disease prevention[cite: 54]. In pilot rural communities—specifically Barangay Palaquio, Barangay Tabiog, and Barangay Babangcag in Lagangilang, Abra—health service delivery relies heavily on paper logbooks and manual physical folders[cite: 52, 55].
+Primary healthcare at the grassroots level serves as the frontline entry point for essential community services, including immunization, maternal care, and communicable/non-communicable disease prevention[cite: 54]. In pilot rural communities—specifically Barangay Palaquio, Barangay Tabiog, and Barangay Babangcag in Bucay, Abra—health service delivery relies heavily on paper logbooks and manual physical folders[cite: 52, 55].
 
 #### 1.1 Clinical & Operational Challenges
 * **Data Redundancy & Attrition:** Paper-based entries result in duplicated patient profiles across separate logbooks, physical degradation of historical cards, and prolonged retrieval times during high-volume triage[cite: 55].
@@ -159,7 +159,7 @@ To modernize the stack beyond legacy procedural scripting while respecting the w
 
 ### 1. Executive Summary & Problem Analysis
 
-Primary healthcare at the grassroots level serves as the frontline entry point for essential community services, including immunization, maternal care, and communicable/non-communicable disease prevention[cite: 54]. In pilot rural communities—specifically Barangay Palaquio, Barangay Tabiog, and Barangay Babangcag in Lagangilang, Abra—health service delivery relies heavily on paper logbooks and manual physical folders[cite: 52, 55].
+Primary healthcare at the grassroots level serves as the frontline entry point for essential community services, including immunization, maternal care, and communicable/non-communicable disease prevention[cite: 54]. In pilot rural communities—specifically Barangay Palaquio, Barangay Tabiog, and Barangay Babangcag in Bucay, Abra—health service delivery relies heavily on paper logbooks and manual physical folders[cite: 52, 55].
 
 #### 1.1 Clinical & Operational Challenges
 * **Data Redundancy & Attrition:** Paper-based entries result in duplicated patient profiles across separate logbooks, physical degradation of historical cards, and prolonged retrieval times during high-volume triage[cite: 55].

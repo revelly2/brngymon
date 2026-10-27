@@ -3,9 +3,22 @@ import {
   MaternalRecord,
   AntenatalVisit,
   ImmunizationRecord,
-  TriageSeverity,
-  VaccineStatus,
+  UserRole,
 } from '@/types/database';
+
+export interface ClinicalEncounter {
+  id: string;
+  residentId: string;
+  encounterDate: string;
+  providerName: string;
+  providerRole: UserRole;
+  chiefComplaint: string;
+  clinicalImpression: string;
+  treatmentPlan: string;
+  createdAt: string;
+}
+
+export const INITIAL_ENCOUNTERS: ClinicalEncounter[] = [];
 import {
   evaluateVitals,
   calculateNaegeleEDD,
@@ -77,140 +90,11 @@ export interface DefaulterAlert {
   weeksOverdue: number;
 }
 
-// Initial mock clinical data
-export const INITIAL_VITALS: VitalSign[] = [
-  {
-    id: 'vit-001',
-    resident_id: '11111111-0002-4000-8000-000000000002', // Rodrigo Flores
-    recorded_by_user_id: 'usr-bhw-palaquio',
-    systolic_bp: 185,
-    diastolic_bp: 122,
-    heart_rate_bpm: 96,
-    respiratory_rate_cpm: 22,
-    temperature_celsius: 37.0,
-    weight_kg: 72,
-    height_cm: 168,
-    bmi: 25.5,
-    severity: 'CRITICAL',
-    clinical_flags: ['HYPERTENSIVE_CRISIS_EMERGENCY', 'BMI_OBESE_1'],
-    referral_recommended: true,
-    notes: 'Urgent referral needed. Patient reported severe occipital headache.',
-    recorded_at: new Date('2026-03-01T08:30:00Z').toISOString(),
-  },
-  {
-    id: 'vit-002',
-    resident_id: '11111111-0001-4000-8000-000000000001', // Maria Dela Cruz
-    recorded_by_user_id: 'usr-nurse-lagangilang',
-    systolic_bp: 116,
-    diastolic_bp: 74,
-    heart_rate_bpm: 78,
-    respiratory_rate_cpm: 18,
-    temperature_celsius: 36.6,
-    weight_kg: 58,
-    height_cm: 155,
-    bmi: 24.1,
-    severity: 'NORMAL',
-    clinical_flags: [],
-    referral_recommended: false,
-    notes: 'Routine antenatal checkup. Fetal movement felt.',
-    recorded_at: new Date('2026-03-05T09:15:00Z').toISOString(),
-  },
-];
-
-export const INITIAL_MATERNAL_RECORDS: MaternalRecord[] = [
-  {
-    id: 'mat-001',
-    resident_id: '11111111-0001-4000-8000-000000000001', // Maria Dela Cruz
-    gravida: 2,
-    para: 1,
-    full_term: 1,
-    preterm: 0,
-    abortion: 0,
-    living_children: 1,
-    lmp: '2025-08-15',
-    edd: '2026-05-22',
-    high_risk_flags: [],
-    is_active: true,
-    recorded_by_user_id: 'usr-nurse-lagangilang',
-    created_at: new Date('2025-09-01').toISOString(),
-    updated_at: new Date('2026-03-05').toISOString(),
-  },
-];
-
-export const INITIAL_ANTENATAL_VISITS: AntenatalVisit[] = [
-  {
-    id: 'anv-001',
-    maternal_record_id: 'mat-001',
-    visit_number: 1,
-    gestational_age_weeks: 10,
-    fundic_height_cm: 12,
-    fetal_heart_tone_bpm: 145,
-    iron_folic_acid_distributed: true,
-    systolic_bp: 110,
-    diastolic_bp: 70,
-    weight_kg: 55,
-    notes: '1st trimester intake completed. Micronutrients supplied.',
-    recorded_by_user_id: 'usr-nurse-lagangilang',
-    visit_date: '2025-10-24',
-    created_at: new Date('2025-10-24').toISOString(),
-  },
-  {
-    id: 'anv-002',
-    maternal_record_id: 'mat-001',
-    visit_number: 2,
-    gestational_age_weeks: 20,
-    fundic_height_cm: 19,
-    fetal_heart_tone_bpm: 150,
-    iron_folic_acid_distributed: true,
-    systolic_bp: 114,
-    diastolic_bp: 72,
-    weight_kg: 56.5,
-    notes: '2nd trimester ultrasound review normal.',
-    recorded_by_user_id: 'usr-nurse-lagangilang',
-    visit_date: '2026-01-05',
-    created_at: new Date('2026-01-05').toISOString(),
-  },
-];
-
-export const INITIAL_IMMUNIZATIONS: ImmunizationRecord[] = [
-  {
-    id: 'imm-001',
-    resident_id: '11111111-0003-4000-8000-000000000003', // Ethan Ramos (Born 2025-08-20)
-    vaccine_code: 'BCG',
-    dose_number: 1,
-    status: 'administered',
-    scheduled_date: '2025-08-20',
-    administered_date: '2025-08-20',
-    batch_number: 'BCG-2025-09',
-    administered_by_user_id: 'usr-nurse-lagangilang',
-    notes: 'Administered at delivery center',
-    created_at: new Date('2025-08-20').toISOString(),
-  },
-  {
-    id: 'imm-002',
-    resident_id: '11111111-0003-4000-8000-000000000003',
-    vaccine_code: 'HEP_B',
-    dose_number: 1,
-    status: 'administered',
-    scheduled_date: '2025-08-20',
-    administered_date: '2025-08-20',
-    batch_number: 'HEPB-881',
-    administered_by_user_id: 'usr-nurse-lagangilang',
-    created_at: new Date('2025-08-20').toISOString(),
-  },
-  {
-    id: 'imm-003',
-    resident_id: '11111111-0003-4000-8000-000000000003',
-    vaccine_code: 'PENTA_1',
-    dose_number: 1,
-    status: 'administered',
-    scheduled_date: '2025-10-01',
-    administered_date: '2025-10-02',
-    batch_number: 'PEN-554',
-    administered_by_user_id: 'usr-nurse-lagangilang',
-    created_at: new Date('2025-10-02').toISOString(),
-  },
-];
+// Production clinical dataset initializers (empty default states)
+export const INITIAL_VITALS: VitalSign[] = [];
+export const INITIAL_MATERNAL_RECORDS: MaternalRecord[] = [];
+export const INITIAL_ANTENATAL_VISITS: AntenatalVisit[] = [];
+export const INITIAL_IMMUNIZATIONS: ImmunizationRecord[] = [];
 
 export class ClinicalService {
   private static VITALS_KEY = 'bhms_vitals_cache';
@@ -218,10 +102,10 @@ export class ClinicalService {
   private static VISITS_KEY = 'bhms_visits_cache';
   private static IMMUNIZATION_KEY = 'bhms_immunization_cache';
 
-  private static serverVitals: VitalSign[] = [...INITIAL_VITALS];
-  private static serverMaternal: MaternalRecord[] = [...INITIAL_MATERNAL_RECORDS];
-  private static serverVisits: AntenatalVisit[] = [...INITIAL_ANTENATAL_VISITS];
-  private static serverImmunizations: ImmunizationRecord[] = [...INITIAL_IMMUNIZATIONS];
+  private static serverVitals: VitalSign[] = [];
+  private static serverMaternal: MaternalRecord[] = [];
+  private static serverVisits: AntenatalVisit[] = [];
+  private static serverImmunizations: ImmunizationRecord[] = [];
 
   // --- VITALS ENCOUNTER METHODS ---
   public static getVitals(): VitalSign[] {
@@ -229,10 +113,18 @@ export class ClinicalService {
     try {
       const stored = localStorage.getItem(this.VITALS_KEY);
       if (!stored) {
-        localStorage.setItem(this.VITALS_KEY, JSON.stringify(INITIAL_VITALS));
-        return [...INITIAL_VITALS];
+        localStorage.setItem(this.VITALS_KEY, JSON.stringify([]));
+        return [];
       }
-      return JSON.parse(stored);
+      const parsed: VitalSign[] = JSON.parse(stored);
+      // Filter out legacy mock data
+      const mockIds = ['vit-001', 'vit-002'];
+      const cleaned = parsed.filter((v) => !mockIds.includes(v.id));
+      if (cleaned.length !== parsed.length) {
+        localStorage.setItem(this.VITALS_KEY, JSON.stringify(cleaned));
+      }
+      this.serverVitals = cleaned;
+      return cleaned;
     } catch {
       return this.serverVitals;
     }
@@ -293,10 +185,17 @@ export class ClinicalService {
     try {
       const stored = localStorage.getItem(this.MATERNAL_KEY);
       if (!stored) {
-        localStorage.setItem(this.MATERNAL_KEY, JSON.stringify(INITIAL_MATERNAL_RECORDS));
-        return [...INITIAL_MATERNAL_RECORDS];
+        localStorage.setItem(this.MATERNAL_KEY, JSON.stringify([]));
+        return [];
       }
-      return JSON.parse(stored);
+      const parsed: MaternalRecord[] = JSON.parse(stored);
+      const mockIds = ['mat-001'];
+      const cleaned = parsed.filter((m) => !mockIds.includes(m.id));
+      if (cleaned.length !== parsed.length) {
+        localStorage.setItem(this.MATERNAL_KEY, JSON.stringify(cleaned));
+      }
+      this.serverMaternal = cleaned;
+      return cleaned;
     } catch {
       return this.serverMaternal;
     }
@@ -307,10 +206,17 @@ export class ClinicalService {
     try {
       const stored = localStorage.getItem(this.VISITS_KEY);
       if (!stored) {
-        localStorage.setItem(this.VISITS_KEY, JSON.stringify(INITIAL_ANTENATAL_VISITS));
-        return [...INITIAL_ANTENATAL_VISITS];
+        localStorage.setItem(this.VISITS_KEY, JSON.stringify([]));
+        return [];
       }
-      return JSON.parse(stored);
+      const parsed: AntenatalVisit[] = JSON.parse(stored);
+      const mockIds = ['anv-001', 'anv-002'];
+      const cleaned = parsed.filter((v) => !mockIds.includes(v.id));
+      if (cleaned.length !== parsed.length) {
+        localStorage.setItem(this.VISITS_KEY, JSON.stringify(cleaned));
+      }
+      this.serverVisits = cleaned;
+      return cleaned;
     } catch {
       return this.serverVisits;
     }
@@ -362,16 +268,22 @@ export class ClinicalService {
 
   // --- PEDIATRIC EPI IMMUNIZATION & DEFAULTER ENGINE ---
   public static getImmunizations(): ImmunizationRecord[] {
-    if (typeof window === 'undefined') return [...INITIAL_IMMUNIZATIONS];
+    if (typeof window === 'undefined') return [];
     try {
       const stored = localStorage.getItem(this.IMMUNIZATION_KEY);
       if (!stored) {
-        localStorage.setItem(this.IMMUNIZATION_KEY, JSON.stringify(INITIAL_IMMUNIZATIONS));
-        return [...INITIAL_IMMUNIZATIONS];
+        localStorage.setItem(this.IMMUNIZATION_KEY, JSON.stringify([]));
+        return [];
       }
-      return JSON.parse(stored);
+      const parsed: ImmunizationRecord[] = JSON.parse(stored);
+      const mockIds = ['imm-001', 'imm-002', 'imm-003'];
+      const cleaned = parsed.filter((i) => !mockIds.includes(i.id));
+      if (cleaned.length !== parsed.length) {
+        localStorage.setItem(this.IMMUNIZATION_KEY, JSON.stringify(cleaned));
+      }
+      return cleaned;
     } catch {
-      return [...INITIAL_IMMUNIZATIONS];
+      return [];
     }
   }
 
@@ -421,5 +333,58 @@ export class ClinicalService {
     }
 
     return defaulters;
+  }
+
+  // --- CLINICAL ENCOUNTERS & MEDICAL CHART HISTORY ---
+  private static ENCOUNTERS_KEY = 'bhsms_clinical_encounters_v1';
+  private static inMemoryEncounters: ClinicalEncounter[] | null = null;
+
+  public static getEncounters(residentId?: string): ClinicalEncounter[] {
+    let all: ClinicalEncounter[] = [];
+    if (typeof window === 'undefined') {
+      all = this.inMemoryEncounters || [];
+    } else {
+      try {
+        const stored = localStorage.getItem(this.ENCOUNTERS_KEY);
+        if (!stored) {
+          localStorage.setItem(this.ENCOUNTERS_KEY, JSON.stringify([]));
+          all = [];
+        } else {
+          const parsed: ClinicalEncounter[] = JSON.parse(stored);
+          const mockIds = ['enc-001', 'enc-002'];
+          const cleaned = parsed.filter((e) => !mockIds.includes(e.id));
+          if (cleaned.length !== parsed.length) {
+            localStorage.setItem(this.ENCOUNTERS_KEY, JSON.stringify(cleaned));
+          }
+          all = cleaned;
+        }
+      } catch {
+        all = [];
+      }
+    }
+
+    if (residentId) {
+      return all.filter((e) => e.residentId === residentId);
+    }
+    return all;
+  }
+
+  public static addEncounter(input: Omit<ClinicalEncounter, 'id' | 'createdAt'>): ClinicalEncounter {
+    const current = this.getEncounters();
+    const newRecord: ClinicalEncounter = {
+      ...input,
+      id: crypto.randomUUID ? crypto.randomUUID() : `enc-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+    };
+    const updated = [newRecord, ...current];
+    this.inMemoryEncounters = updated;
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(this.ENCOUNTERS_KEY, JSON.stringify(updated));
+      } catch (err) {
+        console.error('Failed to save clinical encounter:', err);
+      }
+    }
+    return newRecord;
   }
 }

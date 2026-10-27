@@ -1,8 +1,19 @@
 @import "tailwindcss";
 
+@custom-variant dark (.dark &, .dark&);
+
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
+  --primary: #059669;
+  --primary-dark: #047857;
+}
+
+.dark {
+  --background: #090d16;
+  --foreground: #f1f5f9;
+  --primary: #10b981;
+  --primary-dark: #059669;
 }
 
 @theme inline {
@@ -13,7 +24,161 @@
 }
 
 body {
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--background);
+  color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Clinical Telemetry & Vitals tabular spacing */
+.tabular-vitals {
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Custom minimal scrollbar for clinical dashboards */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* =========================================================================
+   FUTURISTIC & CLEAN CLINICAL CARD SYSTEM
+   Precision telemetry styling with multi-tier soft shadows and rim lighting
+   ========================================================================= */
+
+.futuristic-card {
+  position: relative;
+  background-color: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 8px -1px rgba(15, 23, 42, 0.03);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.futuristic-card:hover {
+  border-color: rgba(203, 213, 225, 0.95);
+  box-shadow: 0 10px 28px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+}
+
+.dark .futuristic-card {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.85) 100%);
+  border: 1px solid rgba(51, 65, 85, 0.65);
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.45), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+}
+
+.dark .futuristic-card:hover {
+  border-color: rgba(71, 85, 105, 0.85);
+  box-shadow: 0 12px 38px -4px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+.futuristic-kpi {
+  position: relative;
+  overflow: hidden;
+  background-color: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 0.875rem;
+  padding: 1.125rem 1.25rem;
+  box-shadow: 0 2px 14px -2px rgba(15, 23, 42, 0.04), 0 1px 4px -1px rgba(15, 23, 42, 0.02);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.futuristic-kpi:hover {
+  transform: translateY(-2px);
+  border-color: rgba(203, 213, 225, 1);
+  box-shadow: 0 8px 24px -3px rgba(15, 23, 42, 0.08), 0 2px 8px -1px rgba(15, 23, 42, 0.03);
+}
+
+.dark .futuristic-kpi {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.8) 100%);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+.dark .futuristic-kpi:hover {
+  transform: translateY(-2px);
+  border-color: rgba(71, 85, 105, 0.9);
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.55), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+}
+
+/* Subtle top micro-accent line for futuristic cards */
+.accent-line-emerald::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #059669 35%, #10b981 65%, transparent);
+  border-radius: 1rem 1rem 0 0;
+  opacity: 0.9;
+}
+
+.accent-line-blue::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #2563eb 35%, #38bdf8 65%, transparent);
+  border-radius: 1rem 1rem 0 0;
+  opacity: 0.9;
+}
+
+.accent-line-pink::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #db2777 35%, #f472b6 65%, transparent);
+  border-radius: 1rem 1rem 0 0;
+  opacity: 0.9;
+}
+
+.accent-line-amber::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #d97706 35%, #fbbf24 65%, transparent);
+  border-radius: 1rem 1rem 0 0;
+  opacity: 0.9;
+}
+
+.accent-line-indigo::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #4f46e5 35%, #818cf8 65%, transparent);
+  border-radius: 1rem 1rem 0 0;
+  opacity: 0.9;
 }

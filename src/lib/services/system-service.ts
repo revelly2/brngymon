@@ -1,6 +1,5 @@
 import { ResidentRegistryService } from '@/lib/services/resident-service';
 import { ClinicalService } from '@/lib/services/clinical-service';
-import { EvaluationService } from '@/lib/services/evaluation-service';
 import { AnalyticsService } from '@/lib/services/analytics-service';
 
 export interface StationDiagnostics {
@@ -54,7 +53,7 @@ export class SystemService {
   /**
    * Generates a complete facility backup bundle for offline archival
    */
-  public static generateBackupBundle(facilityName: string = 'Lagangilang Pilot Cluster'): BackupBundle {
+  public static generateBackupBundle(facilityName: string = 'Bucay Pilot Cluster'): BackupBundle {
     const residents = ResidentRegistryService.getResidents();
     const vitals = ClinicalService.getVitals();
     const maternal = ClinicalService.getMaternalRecords();

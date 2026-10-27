@@ -4,12 +4,26 @@ export type BarangayCode = 'PALAQUIO' | 'TABIOG' | 'BABANGCAG';
 export type TriageSeverity = 'NORMAL' | 'ELEVATED' | 'HIGH' | 'CRITICAL';
 export type VaccineStatus = 'scheduled' | 'administered' | 'missed' | 'exempted';
 
+export type SystemModuleId =
+  | 'resident_profiling'
+  | 'resident_intake'
+  | 'vitals_triage'
+  | 'patient_chart'
+  | 'maternal_care'
+  | 'immunization_epi'
+  | 'referral_management'
+  | 'analytics_surveillance'
+  | 'system_operations'
+  | 'user_management'
+  | 'evaluation_uat';
+
 export interface UserProfile {
   id: string; // references auth.users
   full_name: string;
   role: UserRole;
   barangay: BarangayCode;
   contact_number?: string;
+  modules?: SystemModuleId[];
   created_at: string;
   updated_at: string;
 }

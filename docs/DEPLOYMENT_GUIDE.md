@@ -1,6 +1,6 @@
 # Barangay Health Status Monitoring System (BHSMS)
 ## Phase 6 Facility Deployment & Operationalization Guide
-**Target Pilot Deployments:** Barangay Palaquio, Barangay Tabiog, and Barangay Babangcag (Municipality of Lagangilang, Abra)  
+**Target Pilot Deployments:** Barangay Palaquio, Barangay Tabiog, and Barangay Babangcag (Municipality of Bucay, Abra)  
 **System Version:** 1.1.0 Production Release  
 **BaaS / Database:** Supabase (PostgreSQL 16 with Row-Level Security)  
 

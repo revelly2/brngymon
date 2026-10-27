@@ -7,65 +7,8 @@ const BARANGAY_PREFIX_MAP: Record<BarangayCode, string> = {
   BABANGCAG: 'BAB',
 };
 
-// Initial verified mock records for Abra pilot communities
-export const INITIAL_MOCK_RESIDENTS: Resident[] = [
-  {
-    id: '11111111-0001-4000-8000-000000000001',
-    upi: 'BHS-PAL-2026-0001',
-    household_id: 'h1',
-    first_name: 'Maria',
-    middle_name: 'Santos',
-    last_name: 'Dela Cruz',
-    date_of_birth: '1994-06-12',
-    biological_sex: 'female',
-    civil_status: 'married',
-    barangay: 'PALAQUIO',
-    purok: 'Purok 1 Centro',
-    contact_number: '09171234567',
-    philhealth_id: '12-345678901-2',
-    is_pregnant: true,
-    soundex_key: 'D426-MAR-1994-06-12',
-    created_at: new Date('2026-01-10').toISOString(),
-    updated_at: new Date('2026-01-10').toISOString(),
-  },
-  {
-    id: '11111111-0002-4000-8000-000000000002',
-    upi: 'BHS-TAB-2026-0002',
-    household_id: 'h2',
-    first_name: 'Rodrigo',
-    middle_name: 'Bautista',
-    last_name: 'Flores',
-    date_of_birth: '1962-11-04',
-    biological_sex: 'male',
-    civil_status: 'married',
-    barangay: 'TABIOG',
-    purok: 'Sitio Riverside',
-    contact_number: '09289876543',
-    philhealth_id: '01-987654321-0',
-    is_pregnant: false,
-    soundex_key: 'F462-ROD-1962-11-04',
-    created_at: new Date('2026-01-12').toISOString(),
-    updated_at: new Date('2026-01-12').toISOString(),
-  },
-  {
-    id: '11111111-0003-4000-8000-000000000003',
-    upi: 'BHS-BAB-2026-0003',
-    household_id: 'h3',
-    first_name: 'Ethan',
-    middle_name: 'Garcia',
-    last_name: 'Ramos',
-    date_of_birth: '2025-08-20',
-    biological_sex: 'male',
-    civil_status: 'single',
-    barangay: 'BABANGCAG',
-    purok: 'Purok 3 Hillside',
-    contact_number: '09195551234',
-    is_pregnant: false,
-    soundex_key: 'R520-ETH-2025-08-20',
-    created_at: new Date('2026-02-01').toISOString(),
-    updated_at: new Date('2026-02-01').toISOString(),
-  },
-];
+// Fresh production community resident registry
+export const INITIAL_MOCK_RESIDENTS: Resident[] = [];
 
 export interface RegistrationInput {
   barangay: BarangayCode;
@@ -86,7 +29,7 @@ export interface RegistrationInput {
 
 export class ResidentRegistryService {
   private static STORAGE_KEY = 'bhms_residents_cache';
-  private static serverCache: Resident[] = [...INITIAL_MOCK_RESIDENTS];
+  private static serverCache: Resident[] = [];
 
   public static getResidents(): Resident[] {
     if (typeof window === 'undefined') {
@@ -96,10 +39,22 @@ export class ResidentRegistryService {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (!stored) {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(INITIAL_MOCK_RESIDENTS));
-        return [...INITIAL_MOCK_RESIDENTS];
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify([]));
+        return [];
       }
-      return JSON.parse(stored);
+      const parsed: Resident[] = JSON.parse(stored);
+      // Filter out legacy mock demo records
+      const mockIds = [
+        '11111111-0001-4000-8000-000000000001',
+        '11111111-0002-4000-8000-000000000002',
+        '11111111-0003-4000-8000-000000000003',
+      ];
+      const cleaned = parsed.filter((r) => !mockIds.includes(r.id));
+      if (cleaned.length !== parsed.length) {
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(cleaned));
+      }
+      this.serverCache = cleaned;
+      return cleaned;
     } catch {
       return this.serverCache;
     }

@@ -67,32 +67,34 @@ export function LguDashboard() {
   const [exportNotice, setExportNotice] = useState<string | null>(null);
 
   const handleExportBrief = () => {
-    setExportNotice('Executive Brief Generated: Lagangilang_Health_Status_Brief_2026.pdf (RA 10173 Zero-PHI Compliant)');
+    setExportNotice('Executive Brief Generated: Bucay_Health_Status_Brief_2026.pdf (RA 10173 Zero-PHI Compliant)');
     setTimeout(() => setExportNotice(null), 4500);
   };
 
   return (
     <div className="space-y-6">
       {/* Banner */}
-      <div className="p-6 rounded-2xl bg-gradient-to-br from-amber-50/90 via-white to-orange-50/70 border border-amber-200/80 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xs">
+      <div className="futuristic-card accent-line-amber p-6 lg:p-7 bg-gradient-to-br from-amber-50/70 via-white to-orange-50/40 dark:from-slate-900 dark:via-slate-900/95 dark:to-amber-950/20 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-colors">
         <div className="space-y-2">
-          <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold">
+          <div className="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full bg-amber-100/80 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-xs font-semibold">
             <Building className="w-3.5 h-3.5" />
             <span>Municipal Local Government Unit • Executive Policy Portal</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900">LGU Public Health Surveillance & Governance</h1>
-          <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
-            Welcome, <strong>Hon. {user.name}</strong>. Aggregated, de-identified population health metrics for legislative planning, healthcare budget allocation, and epidemic monitoring across Lagangilang pilot barangays.
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+            LGU Public Health Surveillance & Governance
+          </h1>
+          <p className="text-xs text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
+            Welcome, <strong>Hon. {user.name}</strong>. Aggregated, de-identified population health metrics for legislative planning, healthcare budget allocation, and epidemic monitoring across Bucay pilot barangays.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <div className="flex items-center space-x-2 bg-white px-3 py-2 rounded-lg border border-slate-300 shadow-2xs">
-            <span className="text-xs text-slate-600 font-semibold">Jurisdiction:</span>
+          <div className="flex items-center space-x-2 bg-white dark:bg-slate-800 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 shadow-xs">
+            <span className="text-xs text-slate-600 dark:text-slate-300 font-semibold">Jurisdiction:</span>
             <select
               value={selectedBrgy}
               onChange={(e) => setSelectedBrgy(e.target.value as BarangayCode | 'ALL')}
-              className="bg-slate-50 text-slate-800 text-xs font-semibold rounded px-2 py-1 border border-slate-300 focus:outline-none focus:border-amber-500 cursor-pointer"
+              className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-semibold rounded px-2 py-1 border border-slate-300 dark:border-slate-600 focus:outline-none focus:border-amber-500 cursor-pointer"
             >
               <option value="ALL">All Pilot Barangays (3)</option>
               <option value="PALAQUIO">Barangay Palaquio</option>
@@ -104,7 +106,7 @@ export function LguDashboard() {
           <button
             type="button"
             onClick={handleExportBrief}
-            className="px-4 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-xs font-semibold text-white transition-colors flex items-center space-x-2 shadow-xs cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-xs font-semibold text-white transition-all flex items-center space-x-2 shadow-sm hover:shadow hover:-translate-y-0.5 cursor-pointer"
           >
             <BarChart3 className="w-4 h-4" />
             <span>Export Executive Brief</span>
@@ -113,78 +115,78 @@ export function LguDashboard() {
       </div>
 
       {exportNotice && (
-        <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-center space-x-2 font-medium shadow-xs">
-          <CheckCircle2 className="w-4 h-4 shrink-0 text-amber-600" />
+        <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-amber-900 dark:text-amber-300 text-xs flex items-center space-x-2 font-medium shadow-xs">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
           <span>{exportNotice}</span>
         </div>
       )}
 
       {/* RA 10173 DPA Compliance Notice */}
-      <div className="p-3.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between text-xs text-slate-600 shadow-xs">
+      <div className="futuristic-card p-4 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
         <div className="flex items-center space-x-2.5">
-          <Lock className="w-4 h-4 text-emerald-600 shrink-0" />
+          <Lock className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span>
-            <strong className="text-slate-900">Republic Act No. 10173 (Data Privacy Act of 2012) Enforced:</strong> Individual clinical charts and patient identifiable records are de-identified. All displayed figures represent aggregated epidemiological surveillance.
+            <strong className="text-slate-900 dark:text-slate-100">Republic Act No. 10173 (Data Privacy Act of 2012) Enforced:</strong> Individual clinical charts and patient identifiable records are de-identified. All displayed figures represent aggregated epidemiological surveillance.
           </span>
         </div>
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold shrink-0 hidden sm:inline-block">
+        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-semibold shrink-0 hidden sm:inline-block">
           ZERO-PHI MODE
         </span>
       </div>
 
       {/* Aggregate Population & Health Coverage KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-medium">Profiled Population</span>
-            <Users className="w-4 h-4 text-purple-600" />
+        <div className="futuristic-kpi">
+          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+            <span className="text-[11px] uppercase tracking-wider font-semibold">Profiled Population</span>
+            <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
           </div>
-          <div className="text-2xl font-bold text-slate-900">{totalPop}</div>
-          <div className="text-[11px] text-purple-700 mt-1 font-medium">
+          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tabular-nums">{totalPop}</div>
+          <div className="text-[11px] text-purple-700 dark:text-purple-400 mt-1 font-semibold">
             {selectedBrgy === 'ALL' ? 'Across 3 Pilot Barangays' : `Barangay ${selectedBrgy}`}
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-medium">Hypertension Prevalence</span>
-            <TrendingUp className="w-4 h-4 text-amber-600" />
+        <div className="futuristic-kpi">
+          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+            <span className="text-[11px] uppercase tracking-wider font-semibold">Hypertension Rate</span>
+            <TrendingUp className="w-4 h-4 text-amber-600 dark:text-amber-400" />
           </div>
-          <div className="text-2xl font-bold text-amber-700">
+          <div className="text-2xl sm:text-3xl font-extrabold text-amber-700 dark:text-amber-400 tabular-nums">
             {filteredVitals.length > 0 ? `${Math.round((hypertensiveCount / filteredVitals.length) * 100)}%` : '0%'}
           </div>
-          <div className="text-[11px] text-slate-500 mt-1">{hypertensiveCount} screened elevated</div>
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">{hypertensiveCount} screened elevated</div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-medium">Active Pregnancies</span>
-            <Baby className="w-4 h-4 text-pink-600" />
+        <div className="futuristic-kpi">
+          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+            <span className="text-[11px] uppercase tracking-wider font-semibold">Active Pregnancies</span>
+            <Baby className="w-4 h-4 text-pink-600 dark:text-pink-400" />
           </div>
-          <div className="text-2xl font-bold text-pink-700">{pregnantCount}</div>
-          <div className="text-[11px] text-slate-500 mt-1">DOH ANC program enrolled</div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-pink-700 dark:text-pink-400 tabular-nums">{pregnantCount}</div>
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">DOH ANC program enrolled</div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-medium">Febrile Cluster Watch</span>
-            <AlertTriangle className="w-4 h-4 text-rose-600" />
+        <div className="futuristic-kpi">
+          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+            <span className="text-[11px] uppercase tracking-wider font-semibold">Febrile Watch</span>
+            <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
           </div>
-          <div className="text-2xl font-bold text-rose-700">{febrileCount}</div>
-          <div className="text-[11px] text-slate-500 mt-1">Dengue / Acute viral surveillance</div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-rose-700 dark:text-rose-400 tabular-nums">{febrileCount}</div>
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Dengue / Acute viral watch</div>
         </div>
       </div>
 
       {/* Main Grid: Purok Density & Program Performance */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Purok-Level Demographics Distribution */}
-        <div className="lg:col-span-7 bg-white border border-slate-200 rounded-xl p-5 space-y-4 shadow-xs">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div className="lg:col-span-7 futuristic-card p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
             <div className="flex items-center space-x-2">
-              <Users className="w-4 h-4 text-purple-600" />
-              <h3 className="text-sm font-bold text-slate-900">Purok Population Density & Profiling</h3>
+              <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Purok Population Density & Profiling</h3>
             </div>
-            <span className="text-[11px] text-slate-500 font-mono font-medium">BHW Survey Coverage</span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono font-medium">BHW Survey Coverage</span>
           </div>
 
           <div className="space-y-3">
@@ -193,12 +195,12 @@ export function LguDashboard() {
               return (
                 <div key={purokKey} className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-900">{purokKey}</span>
-                    <span className="text-slate-600 font-mono">
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">{purokKey}</span>
+                    <span className="text-slate-600 dark:text-slate-400 font-mono">
                       {count} residents ({pct}%)
                     </span>
                   </div>
-                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
+                  <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-200 dark:border-slate-700">
                     <div
                       className="bg-purple-600 h-2 rounded-full transition-all duration-500"
                       style={{ width: `${pct}%` }}
@@ -209,39 +211,39 @@ export function LguDashboard() {
             })}
           </div>
 
-          <div className="pt-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
-            <span>Pediatric Cohort (&lt;5 yrs): <strong className="text-slate-900">{pediatricCount}</strong></span>
-            <span>Senior Citizens (&ge;60 yrs): <strong className="text-slate-900">{seniorCount}</strong></span>
+          <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
+            <span>Pediatric Cohort (&lt;5 yrs): <strong className="text-slate-900 dark:text-slate-100">{pediatricCount}</strong></span>
+            <span>Senior Citizens (&ge;60 yrs): <strong className="text-slate-900 dark:text-slate-100">{seniorCount}</strong></span>
           </div>
         </div>
 
         {/* LGU Health Policy Insights & Recommendations */}
-        <div className="lg:col-span-5 bg-white border border-slate-200 rounded-xl p-5 space-y-4 shadow-xs">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div className="lg:col-span-5 futuristic-card p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 pb-3">
             <div className="flex items-center space-x-2">
-              <BarChart3 className="w-4 h-4 text-emerald-600" />
-              <h3 className="text-sm font-bold text-slate-900">Municipal Health Policy Recommendations</h3>
+              <BarChart3 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Municipal Health Policy Recommendations</h3>
             </div>
           </div>
 
           <div className="space-y-3 text-xs">
-            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1">
-              <div className="font-semibold text-emerald-800">1. Chronic Disease Maintenance Buffer</div>
-              <p className="text-slate-600 leading-relaxed">
+            <div className="p-3 bg-slate-50 dark:bg-slate-800/70 rounded-lg border border-slate-200 dark:border-slate-700 space-y-1">
+              <div className="font-semibold text-emerald-800 dark:text-emerald-300">1. Chronic Disease Maintenance Buffer</div>
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
                 Hypertension screening shows {hypertensiveCount} residents in Stage 1/2. Recommend procuring adequate buffer stocks of Amlodipine 5mg and Losartan 50mg for the RHU pharmacy.
               </p>
             </div>
 
-            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1">
-              <div className="font-semibold text-pink-800">2. Maternal Nutrition & Micronutrient Support</div>
-              <p className="text-slate-600 leading-relaxed">
+            <div className="p-3 bg-slate-50 dark:bg-slate-800/70 rounded-lg border border-slate-200 dark:border-slate-700 space-y-1">
+              <div className="font-semibold text-pink-800 dark:text-pink-300">2. Maternal Nutrition & Micronutrient Support</div>
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
                 {pregnantCount} active pregnancies enrolled. Ensure uninterrupted municipal provision of Ferrous Sulfate + Folic Acid and Calcium carbonate supplements to prevent maternal anemia and preeclampsia.
               </p>
             </div>
 
-            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1">
-              <div className="font-semibold text-blue-800">3. BHW Field Workstation Enhancement</div>
-              <p className="text-slate-600 leading-relaxed">
+            <div className="p-3 bg-slate-50 dark:bg-slate-800/70 rounded-lg border border-slate-200 dark:border-slate-700 space-y-1">
+              <div className="font-semibold text-blue-800 dark:text-blue-300">3. BHW Field Workstation Enhancement</div>
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
                 Pilot system operates with zero-latency local caching. Recommend sustaining budget for portable digital sphygmomanometers and thermal infant scales.
               </p>
             </div>
@@ -250,7 +252,7 @@ export function LguDashboard() {
           <div className="pt-2">
             <Link
               href="/analytics"
-              className="w-full py-2.5 rounded-lg bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition-colors flex items-center justify-center space-x-2 border border-slate-300 shadow-2xs"
+              className="w-full py-2.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors flex items-center justify-center space-x-2 border border-slate-300 dark:border-slate-700 shadow-2xs"
             >
               <span>Explore Full Statistical Charts</span>
               <BarChart3 className="w-4 h-4" />
