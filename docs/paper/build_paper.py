@@ -532,8 +532,9 @@ P("The Output component is the Barangay Health Status Monitoring System, a web-b
   "and user-friendliness. The feedback arrow in Figure 1 indicates that the evaluation results inform the "
   "further refinement of the system.")
 
-ipo = d.add_table(rows=2, cols=3); ipo.style = GRID; boxed(ipo); ipo.alignment = WD_TABLE_ALIGNMENT.CENTER
-for i, (head, lines) in enumerate([
+ipo = d.add_table(rows=2, cols=5); ipo.style = GRID; ipo.alignment = WD_TABLE_ALIGNMENT.CENTER
+# Columns: INPUT | arrow | PROCESS | arrow | OUTPUT
+ipo_data = [
     ("INPUT", ["Knowledge requirements: challenges of the manual system; DOH EPI schedule; 4-visit ANC; "
                "PH hypertension CPG; WHO Asia-Pacific BMI cut-offs; RA 10173; TAM; ISO 9241-11",
                "Software: Next.js, React, TypeScript, Tailwind CSS, Supabase",
@@ -544,14 +545,39 @@ for i, (head, lines) in enumerate([
                  "Analysis using frequency, percentage, and weighted mean"]),
     ("OUTPUT", ["Barangay Health Status Monitoring System (BHSMS)",
                 "Evaluation of the system in terms of effectiveness, efficiency, and user-friendliness"]),
-]):
-    hp = ipo.cell(0, i).paragraphs[0]; hp.alignment = WD_ALIGN_PARAGRAPH.CENTER; hp.add_run(head).bold = True
-    c = ipo.cell(1, i)
+]
+content_cols = [0, 2, 4]
+arrow_cols = [1, 3]
+for ci, (head, lines) in zip(content_cols, ipo_data):
+    hp = ipo.cell(0, ci).paragraphs[0]; hp.alignment = WD_ALIGN_PARAGRAPH.CENTER; hp.add_run(head).bold = True
+    c = ipo.cell(1, ci)
     for j, line in enumerate(lines):
         p = c.paragraphs[0] if j == 0 else c.add_paragraph()
         p.add_run("• " + line).font.size = Pt(10)
-    for p in ipo.cell(0, i).paragraphs + c.paragraphs:
+    for p in ipo.cell(0, ci).paragraphs + c.paragraphs:
         p.paragraph_format.line_spacing = 1.08; p.paragraph_format.space_after = Pt(2)
+for ac in arrow_cols:
+    ipo.cell(0, ac).merge(ipo.cell(1, ac))
+    ap = ipo.cell(0, ac).paragraphs[0]
+    ap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    r = ap.add_run("→")
+    r.bold = True; r.font.size = Pt(18)
+    # Remove borders on arrow cells
+    for row in ipo.rows:
+        tc = row.cells[ac]._tc
+        tcPr = tc.get_or_add_tcPr()
+        borders = OxmlElement("w:tcBorders")
+        for side in ("top", "bottom", "left", "right"):
+            b = OxmlElement(f"w:{side}")
+            b.set(qn("w:val"), "none"); b.set(qn("w:sz"), "0"); b.set(qn("w:space"), "0")
+            borders.append(b)
+        tcPr.append(borders)
+    ipo.cell(0, ac).width = Inches(0.4)
+# Set content column widths
+for ci in content_cols:
+    for row in ipo.rows:
+        row.cells[ci].width = Inches(2.0)
+boxed(ipo)
 P("Feedback: evaluation results inform the refinement of the system", indent=False, align="c", italic=True,
   spacing=1.08, size=10)
 cap("Figure", "Research Paradigm (IPO Model)")
@@ -746,16 +772,25 @@ P("The study does not include integration with national health information syste
   "reporting times were not measured before and after deployment.")
 
 H2("DATA GATHERING PROCEDURES")
-P("The data gathering followed a systematic seven-stage procedure:")
-numbered([
-    "**Approval:** Secured permission from the barangay officials and the health personnel of Barangays Palaquio, Tabiog, and Babangcag to conduct the study.",
-    "**Instrument Preparation and Validation:** Prepared the questionnaire and submitted it to the adviser for content validation.",
-    "**Needs Assessment:** Conducted interviews with barangay health workers and midwives and administered Part I of the questionnaire to document the challenges of the current manual system.",
-    "**System Development:** Translated the identified requirements into the system through the phases of the Prototype Model.",
-    "**Trial Use:** Oriented the respondents on the use of the system and allowed them to use it during a trial period.",
-    "**Evaluation:** Administered the evaluation part of the questionnaire to the same respondents.",
-    "**Data Processing:** Encoded, tallied, and analyzed the responses using the statistical tools described below.",
-])
+P("The data-gathering procedure began with securing the approval of the barangay officials and health "
+  "personnel of Barangays Palaquio, Tabiog, and Babangcag to conduct the study in their respective health "
+  "stations. Once permission was obtained, the researchers prepared the survey questionnaire and submitted "
+  "it to the research adviser for content validation to ensure that the items were clear, relevant, and "
+  "aligned with the objectives of the study.")
+P("After the instrument was validated, a needs assessment was conducted. The researchers interviewed "
+  "barangay health workers and midwives and administered Part I of the questionnaire to document the "
+  "challenges encountered in the current manual health monitoring system. The data gathered during this "
+  "stage served as the basis for the system requirements.")
+P("The identified requirements were then translated into the system through the iterative phases of the "
+  "Prototype Model: requirements gathering, quick design, prototyping, and testing with users. After each "
+  "testing cycle, the feedback of the health workers was incorporated into the next prototype until the "
+  "system was accepted for deployment.")
+P("Following deployment, the respondents were oriented on how to use the system and were given a trial "
+  "period to familiarize themselves with its features. At the end of the trial period, the evaluation part "
+  "of the questionnaire (Part III) was administered to the same respondents to assess the system in terms "
+  "of effectiveness, efficiency, and user-friendliness.")
+P("Finally, the collected responses were encoded, tallied, and analyzed using the statistical tools "
+  "described in the succeeding section.")
 
 H2("DATA GATHERING INSTRUMENTS")
 P("A researcher-made questionnaire (Appendix A) was used. Part I, on the challenges encountered in the current "
@@ -817,59 +852,83 @@ def item_table(title, group, idx, kind=1):
 AREA_TITLES = ["Challenges in Health Record Management", "Challenges in Monitoring of Residents’ Health",
                "Challenges in Data Accuracy and Consistency", "Challenges in Reporting and Information Retrieval",
                "Challenges in Efficiency and Accessibility"]
+AREA_INTERP = [
+    # (interpretation, implication, justification/RRL support) per area
+    ("The submean of {m}, interpreted as High, indicates that health workers experience considerable difficulty "
+     "in organizing, maintaining, and retrieving paper-based health records.",
+     "This implies that the manual record-keeping system is a significant bottleneck that delays service "
+     "delivery and increases the risk of lost or misplaced documents.",
+     "Batoon et al. (2022) and Altura et al. (2023) found that paper-based records in barangay health centers "
+     "cause redundancy, loss, and slow retrieval. A central, searchable electronic record for every resident "
+     "addresses these issues directly."),
+    ("The submean of {m}, interpreted as High, suggests that health workers find it difficult to identify and "
+     "follow up residents who require consultations using manual records.",
+     "This implies that residents with chronic conditions, abnormal vital signs, or missed vaccinations may "
+     "not receive timely follow-up, potentially leading to poorer health outcomes.",
+     "Garcia et al. (2021) emphasized the importance of automated flagging systems in primary care settings. "
+     "Automatic triage of vital signs and computed defaulter lists ensure that no resident requiring follow-up "
+     "is overlooked."),
+    ("The submean of {m}, interpreted as High, indicates that manual recording increases the possibility of "
+     "errors, duplicate entries, and incomplete information.",
+     "This implies that data quality under the manual system is unreliable, which compromises the accuracy of "
+     "health reports and clinical decisions based on those records.",
+     "Sumaylo (2013) noted that manual health records are prone to transcription errors and inconsistencies. "
+     "Field validation, automatic BMI computation, duplicate detection via Soundex, and required fields "
+     "mitigate these problems."),
+    ("The submean of {m}, interpreted as High, indicates that health workers struggle with generating "
+     "statistics, preparing reports, and accessing historical health information.",
+     "This implies that the manual process of compiling reports from multiple logbooks is time-consuming and "
+     "error-prone, delaying the submission of required reports to the municipal health office.",
+     "Reports compiled by hand from several logbooks invite computation errors (Batoon et al., 2022). "
+     "Automatically generated summaries drawn from a single database address this problem directly."),
+    ("The submean of {m}, interpreted as High, indicates that protecting paper-based records from unauthorized "
+     "access and sharing information among authorized personnel are major concerns.",
+     "This implies that the current system cannot adequately safeguard sensitive health information, exposing "
+     "it to risks of unauthorized access and potential violations of data privacy regulations.",
+     "Health records are sensitive personal information under the Data Privacy Act of 2012 (Republic of the "
+     "Philippines, 2012). Role-based access control with per-user modules, Row-Level Security, and an audit "
+     "trail ensure compliance."),
+]
+
 def area_text(k, t):
     return [
-        [f"Table {t} presents the respondents’ assessment of health record management under the manual system. "
-         f"The submean of {f2(area_m[0])}, interpreted as High, is the highest of the five areas. The difficulty "
-         f"of organizing and maintaining paper-based documents obtained the highest mean of the whole "
-         f"questionnaire, {m1[0]} (Very High), followed by the time needed to retrieve residents’ records, "
-         f"{m1[1]} (Very High). Maintaining accurate and up-to-date records ({m1[4]}), the effort of updating "
-         f"information ({m1[3]}), and records that are misplaced, lost, or damaged ({m1[2]}) were rated High.",
-         "These findings agree with Batoon et al. (2022) and Altura et al. (2023), who found that paper-based "
-         "records in barangay health centers cause redundancy, loss, and slow retrieval. The findings suggest "
-         "the need for a central, searchable record for every resident, which the system provides through the "
-         "resident registry and the Unique Patient Identifier."],
-        [f"Table {t} presents the respondents’ assessment of the monitoring of residents’ health. The submean of "
-         f"{f2(area_m[1])}, interpreted as High, suggests that health workers find it difficult to follow up "
-         f"residents using manual records. Identifying residents who require follow-up consultations obtained "
-         f"the highest mean in this area ({m1[7]}), followed by monitoring the health status of residents "
-         f"({m1[5]}) and tracking residents with recurring illnesses ({m1[6]}). Keeping track of scheduled "
-         f"check-ups ({m1[9]}) and monitoring vaccination records ({m1[8]}) were rated lower but still High.",
-         "Because paper records are not organized by risk, health workers cannot easily see which residents "
-         "need attention. The findings suggest that the system could support monitoring through automatic "
-         "flagging of abnormal vital signs and high-risk pregnancies and an automatically computed list of "
-         "children who missed their vaccinations."],
-        [f"Table {t} presents the respondents’ assessment of data accuracy and consistency. The submean of "
-         f"{f2(area_m[2])} is interpreted as High. The respondents agreed most that manual recording increases "
-         f"the possibility of errors ({m1[10]}) and that duplicate records may occur ({m1[11]}). Incomplete "
-         f"information ({m1[12]}) and the time needed to compare information across documents ({m1[13]}) "
-         f"obtained the lowest means of the questionnaire, although both remain High.",
-         "These results support validation of required fields, automatic computation of values such as body "
-         "mass index and expected date of delivery, and a duplicate check during registration, so that the "
-         "same resident is not recorded twice under slightly different spellings."],
-        [f"Table {t} presents the respondents’ assessment of reporting and information retrieval. The submean of "
-         f"{f2(area_m[3])} is interpreted as High. Accessing historical health information for decision-making "
-         f"obtained the highest mean ({m1[17]}), followed by generating updated statistics ({m1[16]}), "
-         f"preparing health reports for the barangay or municipal health office ({m1[14]}), and consolidating "
-         f"data from different records ({m1[15]}).",
-         "Reports that must be compiled by hand from several logbooks take time and invite computation errors. "
-         "Automatically generated summaries drawn from a single database could address this problem directly."],
-        [f"Table {t} presents the respondents’ assessment of efficiency and accessibility. The submean of "
-         f"{f2(area_m[4])} is interpreted as High. Protecting paper-based records from unauthorized access "
-         f"obtained a mean of {m1[21]}, the only statement on which all {N} respondents chose Agree. Sharing "
-         f"health information among authorized personnel ({m1[20]}), the time and paperwork of manual "
-         f"monitoring ({m1[18]}), and managing a large volume of records ({m1[19]}) followed.",
-         "The concern about unauthorized access is significant because health records are sensitive personal "
-         "information under the Data Privacy Act of 2012 (Republic of the Philippines, 2012). A digital system "
-         "must therefore restrict each user to the records his or her role requires and keep a record of who "
-         "accessed them."],
+        f"Table {t} presents the respondents’ assessment of health record management under the manual system. "
+        f"The submean of {f2(area_m[0])}, interpreted as High, is the highest of the five areas. The difficulty "
+        f"of organizing and maintaining paper-based documents obtained the highest mean of the whole "
+        f"questionnaire, {m1[0]} (Very High), followed by the time needed to retrieve residents’ records, "
+        f"{m1[1]} (Very High). Maintaining accurate and up-to-date records ({m1[4]}), the effort of updating "
+        f"information ({m1[3]}), and records that are misplaced, lost, or damaged ({m1[2]}) were rated High.",
+        f"Table {t} presents the respondents’ assessment of the monitoring of residents’ health. The submean of "
+        f"{f2(area_m[1])}, interpreted as High, suggests that health workers find it difficult to follow up "
+        f"residents using manual records. Identifying residents who require follow-up consultations obtained "
+        f"the highest mean in this area ({m1[7]}), followed by monitoring the health status of residents "
+        f"({m1[5]}) and tracking residents with recurring illnesses ({m1[6]}). Keeping track of scheduled "
+        f"check-ups ({m1[9]}) and monitoring vaccination records ({m1[8]}) were rated lower but still High.",
+        f"Table {t} presents the respondents’ assessment of data accuracy and consistency. The submean of "
+        f"{f2(area_m[2])} is interpreted as High. The respondents agreed most that manual recording increases "
+        f"the possibility of errors ({m1[10]}) and that duplicate records may occur ({m1[11]}). Incomplete "
+        f"information ({m1[12]}) and the time needed to compare information across documents ({m1[13]}) "
+        f"obtained the lowest means of the questionnaire, although both remain High.",
+        f"Table {t} presents the respondents’ assessment of reporting and information retrieval. The submean of "
+        f"{f2(area_m[3])} is interpreted as High. Accessing historical health information for decision-making "
+        f"obtained the highest mean ({m1[17]}), followed by generating updated statistics ({m1[16]}), "
+        f"preparing health reports for the barangay or municipal health office ({m1[14]}), and consolidating "
+        f"data from different records ({m1[15]}).",
+        f"Table {t} presents the respondents’ assessment of efficiency and accessibility. The submean of "
+        f"{f2(area_m[4])} is interpreted as High. Protecting paper-based records from unauthorized access "
+        f"obtained a mean of {m1[21]}, the only statement on which all {N} respondents chose Agree. Sharing "
+        f"health information among authorized personnel ({m1[20]}), the time and paperwork of manual "
+        f"monitoring ({m1[18]}), and managing a large volume of records ({m1[19]}) followed.",
     ][k]
 
 first_area = COUNT["Table"] + 1
 for k in range(5):
     t = item_table(AREA_TITLES[k], Q1[k][1], AREA_IDX[k])
-    for para in area_text(k, t):
-        P(para)
+    P(area_text(k, t))
+    interp, impl, just = AREA_INTERP[k]
+    table(["Interpretation", "Implication", "Justification / RRL Support"],
+          [[interp.format(m=f2(area_m[k])), impl, just]],
+          widths=[2.1, 2.1, 2.3], size=10)
 
 sum_num = cap("Table", "Summary of the Challenges in the Current Manual System")
 rows = []
@@ -892,42 +951,75 @@ P(f"The three barangays gave similar ratings: Babangcag {f2(brgy_all1[2])}, Pala
 P("Additionally, four open-ended questions gave the respondents the opportunity to describe the problems in "
   "their own words. Their answers were coded and tallied by barangay.")
 
+def rank_rows(oe_rows):
+    """Replace the % column with rank based on Total (col 4). Handles ties with averaged ranks."""
+    data = [r[:5] for r in oe_rows]  # cols 0-4: problem, Palaquio, Tabiog, Babangcag, Total
+    totals = []
+    for r in data:
+        if r[0].strip().lower() == "total":
+            continue
+        try:
+            totals.append(int(r[4]))
+        except (ValueError, IndexError):
+            totals.append(0)
+    # Compute ranks (1 = highest total)
+    sorted_t = sorted(set(totals), reverse=True)
+    rank_map = {}
+    pos = 1
+    for val in sorted_t:
+        count = totals.count(val)
+        rank_map[val] = str(pos + (count - 1) / 2) if count > 1 else str(pos)
+        # Clean up .0 for whole numbers
+        if rank_map[val].endswith(".0"):
+            rank_map[val] = rank_map[val][:-2]
+        pos += count
+    result = []
+    for r in data:
+        if r[0].strip().lower() == "total":
+            result.append(r + [""])
+        else:
+            try:
+                result.append(r + [rank_map[int(r[4])]])
+            except (ValueError, IndexError):
+                result.append(r + [""])
+    return result
+
 OE = [
     ("On Common Problems in Recording and Updating Health Information",
      "Common Problems in Recording and Updating Health Information",
      lambda t: f"Table {t} presents the most common problems in recording and updating residents’ health "
-     f"information. Time-consuming recording ranked first (30.36%), followed by lost or misplaced records "
-     f"(19.64%) and incomplete information (17.86%). Inaccurate information and difficulty updating records "
-     f"were each cited by 16.07%. These answers confirm the high ratings for health record management in Table "
+     f"information. Time-consuming recording ranked first, followed by lost or misplaced records "
+     f"and incomplete information. Inaccurate information and difficulty updating records tied for the "
+     f"fourth rank. These answers confirm the high ratings for health record management in Table "
      f"{first_area}."),
     ("On Difficulties in Retrieving and Monitoring Health Records",
      "Difficulties in Retrieving and Monitoring Health Records",
      lambda t: f"Table {t} presents the difficulties in retrieving and monitoring health records. Difficulty "
-     f"finding records ranked first (26.79%), followed by disorganized files and time-consuming monitoring "
-     f"(19.64% each), missing or incomplete records (17.86%), and difficulty tracking a resident’s health "
-     f"history (16.07%). These findings indicate that the location of records, rather than their content, is "
+     f"finding records ranked first, followed by disorganized files and time-consuming monitoring, which "
+     f"tied for the second rank, missing or incomplete records, and difficulty tracking a resident’s health "
+     f"history. These findings indicate that the location of records, rather than their content, is "
      f"the main obstacle."),
     ("On Challenges in Preparing and Submitting Health Reports",
      "Challenges in Preparing and Submitting Health Reports",
      lambda t: f"Table {t} presents the challenges in preparing and submitting barangay health reports. "
-     f"Time-consuming report preparation ranked first (28.57%), followed by incomplete data (19.64%), errors in "
-     f"manual computation and difficulty compiling statistics (17.86% each), and delayed report submission "
-     f"(16.07%)."),
+     f"Time-consuming report preparation ranked first, followed by incomplete data, errors in "
+     f"manual computation and difficulty compiling statistics, which tied for the third rank, and delayed "
+     f"report submission."),
     ("On Problems in Tracking Residents Who Need Follow-Up Services",
      "Problems in Tracking Residents Who Need Follow-Up Services",
      lambda t: f"Table {t} presents the problems in tracking residents who need follow-up consultations, "
-     f"vaccinations, or other health services. Residents forgetting their appointments ranked first (25.00%), "
-     f"followed by difficulty contacting residents (21.43%), lack of reminders (19.64%), missed vaccination "
-     f"schedules (17.86%), and difficulty monitoring follow-ups (16.07%). These problems involve communication "
+     f"vaccinations, or other health services. Residents forgetting their appointments ranked first, "
+     f"followed by difficulty contacting residents, lack of reminders, missed vaccination "
+     f"schedules, and difficulty monitoring follow-ups. These problems involve communication "
      f"with residents, which the system supports through follow-up lists for home visits but does not fully "
      f"solve, since SMS reminders are outside its scope."),
 ]
 for k, (head, title, text) in enumerate(OE):
     H4(head)
     t = cap("Table", title)
-    # SENTENCE PART columns: Barangay 1 = Palaquio (19), 2 = Tabiog (17), 3 = Babangcag (20)
-    table(["Common Problem", "Palaquio", "Tabiog", "Babangcag", "Total", "%"],
-          [r[:6] for r in open_ended[k][1:]], widths=[2.4, 0.9, 0.8, 0.9, 0.7, 0.9], size=11, bold_last=True)
+    ranked = rank_rows(open_ended[k][1:])
+    table(["Common Problem", "Palaquio", "Tabiog", "Babangcag", "Total", "Rank"],
+          ranked, widths=[2.4, 0.9, 0.8, 0.9, 0.7, 0.9], size=11, bold_last=True)
     P(text(t))
 P("Overall, the findings for Problem 1 show that the manual health monitoring system of the three barangays "
   "suffers from four interrelated weaknesses: records are slow to write, find, and update; residents who need "

@@ -4,7 +4,7 @@ import { ClinicalService } from '../src/lib/services/clinical-service';
 import { UserSession } from '../src/lib/context/auth-context';
 import { SystemModuleId } from '../src/types/database';
 
-function runModularPermissionsTests() {
+async function runModularPermissionsTests() {
   console.log('--- RUNNING MODULAR PERMISSIONS & USER MANAGEMENT VALIDATION TESTS ---\n');
   let passed = 0;
   let total = 0;
@@ -60,18 +60,17 @@ function runModularPermissionsTests() {
 
   let nurseUser = users.find((u) => u.role === 'nurse');
   if (!nurseUser) {
-    const created = UserService.createUser(
+    const created = await UserService.createUser(
       {
         fullName: 'Corazon Valdez, RM (Midwife)',
         email: 'midwife.rhus@bucay.gov.ph',
         role: 'nurse',
         barangay: 'TABIOG',
-        employeeId: 'EMP-RHM-002',
+        employeeId: 'EMP-NURSE-001',
       },
       adminSession
     );
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    nurseUser = (created as any).user || UserService.getUsers().find((u) => u.role === 'nurse');
+    nurseUser = created.user || UserService.getUsers().find((u) => u.role === 'nurse');
   }
   assert(!!nurseUser, 'Found nurse user in registry');
   if (nurseUser) {

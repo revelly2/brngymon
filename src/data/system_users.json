@@ -1,0 +1,68 @@
+[
+  {
+    "id": "a0000000-0000-0000-0000-000000000001",
+    "fullName": "LGU System Administrator",
+    "email": "admin.it@bucay.gov.ph",
+    "role": "admin",
+    "barangay": "PALAQUIO",
+    "employeeId": "EMP-ADM-005",
+    "contactNumber": "0917-888-0001",
+    "password": "admin123",
+    "status": "ACTIVE",
+    "stationName": "Bucay IT & Health Ops Center",
+    "modules": [
+      "resident_profiling",
+      "resident_intake",
+      "vitals_triage",
+      "patient_chart",
+      "maternal_care",
+      "immunization_epi",
+      "referral_management",
+      "epidemiology_analytics",
+      "operations_backup",
+      "user_management"
+    ],
+    "createdAt": "2026-01-01T08:00:00.000Z",
+    "updatedAt": "2026-01-01T08:00:00.000Z"
+  },
+  {
+    "id": "a0000000-0000-0000-0000-000000000010",
+    "fullName": "BHW@bucay",
+    "email": "bhw@bucay",
+    "role": "bhw",
+    "barangay": "PALAQUIO",
+    "employeeId": "BHW-BUCAY-01",
+    "contactNumber": "0917-888-0010",
+    "password": "admin123",
+    "status": "ACTIVE",
+    "stationName": "Barangay PALAQUIO Health Station",
+    "modules": [
+      "resident_profiling",
+      "resident_intake",
+      "vitals_triage",
+      "immunization_epi"
+    ],
+    "createdAt": "2026-01-01T08:00:00.000Z",
+    "updatedAt": "2026-01-01T08:00:00.000Z"
+  },
+  {
+    "id": "a0000000-0000-0000-0000-000000000011",
+    "fullName": "Kat",
+    "email": "kat@nurse.bucay",
+    "role": "bhw",
+    "barangay": "PALAQUIO",
+    "employeeId": "KAT1",
+    "contactNumber": "0917-888-0011",
+    "password": "admin123",
+    "status": "ACTIVE",
+    "stationName": "Barangay PALAQUIO Health Station",
+    "modules": [
+      "immunization_epi",
+      "referral_management",
+      "maternal_care",
+      "patient_chart"
+    ],
+    "createdAt": "2026-01-01T08:00:00.000Z",
+    "updatedAt": "2026-01-01T08:00:00.000Z"
+  }
+]

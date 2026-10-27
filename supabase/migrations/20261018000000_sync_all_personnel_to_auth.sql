@@ -178,4 +178,111 @@ BEGIN
     full_name = EXCLUDED.full_name, role = EXCLUDED.role, barangay = EXCLUDED.barangay,
     contact_number = EXCLUDED.contact_number, modules = EXCLUDED.modules, updated_at = NOW();
 
+  -- ----------------------------------------------------------------------------
+  -- Step D: Synchronize Operator BHW@bucay (bhw@bucay)
+  -- ----------------------------------------------------------------------------
+  SELECT id INTO v_uid FROM auth.users WHERE email = 'bhw@bucay' OR email = 'bhw@bucay.gov.ph' LIMIT 1;
+
+  IF v_uid IS NULL THEN
+    v_uid := 'a0000000-0000-0000-0000-000000000010'::uuid;
+    INSERT INTO auth.users (
+      id, instance_id, aud, role, email, encrypted_password, email_confirmed_at,
+      raw_app_meta_data, raw_user_meta_data, created_at, updated_at
+    ) VALUES (
+      v_uid, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+      'bhw@bucay', crypt('admin123', gen_salt('bf')), NOW(),
+      '{"provider": "email", "providers": ["email"]}'::jsonb,
+      '{"full_name": "BHW@bucay", "role": "bhw", "barangay": "PALAQUIO", "employee_id": "BHW-BUCAY-01"}'::jsonb,
+      NOW(), NOW()
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      email = EXCLUDED.email,
+      encrypted_password = EXCLUDED.encrypted_password,
+      email_confirmed_at = COALESCE(auth.users.email_confirmed_at, NOW()),
+      raw_user_meta_data = EXCLUDED.raw_user_meta_data,
+      updated_at = NOW();
+
+    INSERT INTO auth.identities (
+      id, provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at
+    ) VALUES (
+      v_uid, v_uid::text, v_uid,
+      jsonb_build_object('sub', v_uid::text, 'email', 'bhw@bucay'),
+      'email', NOW(), NOW(), NOW()
+    ) ON CONFLICT (provider_id, provider) DO UPDATE SET
+      identity_data = EXCLUDED.identity_data,
+      updated_at = NOW();
+  ELSE
+    UPDATE auth.users
+    SET
+      encrypted_password = crypt('admin123', gen_salt('bf')),
+      email_confirmed_at = COALESCE(email_confirmed_at, NOW()),
+      raw_user_meta_data = '{"full_name": "BHW@bucay", "role": "bhw", "barangay": "PALAQUIO", "employee_id": "BHW-BUCAY-01"}'::jsonb,
+      updated_at = NOW()
+    WHERE id = v_uid;
+  END IF;
+
+  INSERT INTO public.profiles (id, full_name, role, barangay, contact_number, modules, created_at, updated_at)
+  VALUES (
+    v_uid, 'BHW@bucay', 'bhw'::user_role_type, 'PALAQUIO'::barangay_code,
+    '0917-888-0010', ARRAY['resident_profiling', 'resident_intake', 'vitals_triage', 'immunization_epi']::text[],
+    NOW(), NOW()
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    full_name = EXCLUDED.full_name, role = EXCLUDED.role, barangay = EXCLUDED.barangay,
+    contact_number = EXCLUDED.contact_number, modules = EXCLUDED.modules, updated_at = NOW();
+
+
+  -- ----------------------------------------------------------------------------
+  -- Step E: Synchronize Operator Kat (kat@nurse.bucay / KAT1)
+  -- ----------------------------------------------------------------------------
+  SELECT id INTO v_uid FROM auth.users WHERE email = 'kat@nurse.bucay' LIMIT 1;
+
+  IF v_uid IS NULL THEN
+    v_uid := 'a0000000-0000-0000-0000-000000000011'::uuid;
+    INSERT INTO auth.users (
+      id, instance_id, aud, role, email, encrypted_password, email_confirmed_at,
+      raw_app_meta_data, raw_user_meta_data, created_at, updated_at
+    ) VALUES (
+      v_uid, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+      'kat@nurse.bucay', crypt('admin123', gen_salt('bf')), NOW(),
+      '{"provider": "email", "providers": ["email"]}'::jsonb,
+      '{"full_name": "Kat", "role": "bhw", "barangay": "PALAQUIO", "employee_id": "KAT1"}'::jsonb,
+      NOW(), NOW()
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      email = EXCLUDED.email,
+      encrypted_password = EXCLUDED.encrypted_password,
+      email_confirmed_at = COALESCE(auth.users.email_confirmed_at, NOW()),
+      raw_user_meta_data = EXCLUDED.raw_user_meta_data,
+      updated_at = NOW();
+
+    INSERT INTO auth.identities (
+      id, provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at
+    ) VALUES (
+      v_uid, v_uid::text, v_uid,
+      jsonb_build_object('sub', v_uid::text, 'email', 'kat@nurse.bucay'),
+      'email', NOW(), NOW(), NOW()
+    ) ON CONFLICT (provider_id, provider) DO UPDATE SET
+      identity_data = EXCLUDED.identity_data,
+      updated_at = NOW();
+  ELSE
+    UPDATE auth.users
+    SET
+      encrypted_password = crypt('admin123', gen_salt('bf')),
+      email_confirmed_at = COALESCE(email_confirmed_at, NOW()),
+      raw_user_meta_data = '{"full_name": "Kat", "role": "bhw", "barangay": "PALAQUIO", "employee_id": "KAT1"}'::jsonb,
+      updated_at = NOW()
+    WHERE id = v_uid;
+  END IF;
+
+  INSERT INTO public.profiles (id, full_name, role, barangay, contact_number, modules, created_at, updated_at)
+  VALUES (
+    v_uid, 'Kat', 'bhw'::user_role_type, 'PALAQUIO'::barangay_code,
+    '0917-888-0011', ARRAY['immunization_epi', 'referral_management', 'maternal_care', 'patient_chart']::text[],
+    NOW(), NOW()
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    full_name = EXCLUDED.full_name, role = EXCLUDED.role, barangay = EXCLUDED.barangay,
+    contact_number = EXCLUDED.contact_number, modules = EXCLUDED.modules, updated_at = NOW();
+
 END $$;

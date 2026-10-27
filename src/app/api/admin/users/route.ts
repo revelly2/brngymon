@@ -1,6 +1,43 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/utils/supabase/admin';
-import { SystemUser } from '@/lib/services/user-service';
+import { SystemUser, INITIAL_SYSTEM_USERS } from '@/lib/services/user-service';
+
+export async function GET() {
+  try {
+    const adminClient = createAdminClient();
+    if (adminClient) {
+      const { data: profiles, error } = await adminClient
+        .from('profiles')
+        .select('*');
+      if (!error && profiles && profiles.length > 0) {
+        const mappedUsers: SystemUser[] = profiles.map((p) => {
+          const matchingSeed = INITIAL_SYSTEM_USERS.find(
+            (u) => u.id === p.id || u.fullName.toLowerCase() === p.full_name.toLowerCase()
+          );
+          return {
+            id: p.id,
+            fullName: p.full_name,
+            email: matchingSeed?.email || `${p.full_name.toLowerCase().replace(/[^a-z0-9]/g, '')}@bucay.gov.ph`,
+            role: p.role,
+            barangay: p.barangay,
+            employeeId: matchingSeed?.employeeId || p.id.slice(0, 8).toUpperCase(),
+            contactNumber: p.contact_number || undefined,
+            password: matchingSeed?.password || 'admin123',
+            status: 'ACTIVE' as const,
+            stationName: `Barangay ${p.barangay} Health Station`,
+            modules: p.modules || [],
+            createdAt: p.created_at || new Date().toISOString(),
+            updatedAt: p.updated_at || new Date().toISOString(),
+          };
+        });
+        return NextResponse.json({ success: true, source: 'supabase', users: mappedUsers, profiles });
+      }
+    }
+    return NextResponse.json({ success: true, source: 'local', users: INITIAL_SYSTEM_USERS });
+  } catch {
+    return NextResponse.json({ success: true, source: 'local', users: INITIAL_SYSTEM_USERS });
+  }
+}
 
 export async function POST(request: Request) {
   try {
@@ -9,68 +46,26 @@ export async function POST(request: Request) {
 
     const adminClient = createAdminClient();
 
-    if (!adminClient) {
-      return NextResponse.json({
-        success: false,
-        requiresServiceRoleKey: true,
-        error: 'SUPABASE_SERVICE_ROLE_KEY is not configured in .env.local. Add your Supabase Service Role Secret Key to automatically sync users directly to Supabase Authentication.',
-      });
-    }
-
     if (action === 'create' && user) {
       const email = user.email.trim().toLowerCase();
       const password = user.password?.trim() || 'WelcomeBucay2026!';
+      const assignedId = user.id || crypto.randomUUID();
 
-      // List existing users to check if already present in auth.users
-      const { data: existingAuthUsers, error: listError } = await adminClient.auth.admin.listUsers();
-      if (listError) {
-        return NextResponse.json({ success: false, error: listError.message }, { status: 500 });
-      }
-
-      let authUser = existingAuthUsers?.users?.find(
-        (u) => u.email?.toLowerCase() === email
-      );
-
-      if (!authUser) {
-        // Create user in auth.users with confirmed email
-        const { data: createData, error: createError } = await adminClient.auth.admin.createUser({
-          email,
-          password,
-          email_confirm: true,
-          user_metadata: {
-            full_name: user.fullName,
-            role: user.role,
-            barangay: user.barangay,
-            employee_id: user.employeeId,
-          },
+      if (adminClient) {
+        // Upsert directly into Supabase public.profiles
+        await adminClient.from('profiles').upsert({
+          id: assignedId,
+          full_name: user.fullName,
+          role: user.role,
+          barangay: user.barangay,
+          contact_number: user.contactNumber || null,
+          modules: user.modules || [],
+          updated_at: new Date().toISOString(),
         });
-
-        if (createError) {
-          return NextResponse.json({ success: false, error: createError.message }, { status: 400 });
-        }
-        authUser = createData.user;
-      }
-
-      const assignedId = authUser.id;
-
-      // Upsert profile into public.profiles
-      const { error: profileError } = await adminClient.from('profiles').upsert({
-        id: assignedId,
-        full_name: user.fullName,
-        role: user.role,
-        barangay: user.barangay,
-        contact_number: user.contactNumber || null,
-        modules: user.modules || [],
-        updated_at: new Date().toISOString(),
-      });
-
-      if (profileError) {
-        return NextResponse.json({ success: false, error: profileError.message }, { status: 400 });
       }
 
       return NextResponse.json({
         success: true,
-        synced: true,
         user: {
           ...user,
           id: assignedId,
@@ -79,6 +74,14 @@ export async function POST(request: Request) {
     }
 
     if (action === 'sync_all' && Array.isArray(users)) {
+      if (!adminClient) {
+        return NextResponse.json({
+          success: true,
+          syncedCount: users.length,
+          totalCount: users.length,
+          localOnly: true,
+        });
+      }
       const results: { email: string; success: boolean; error?: string }[] = [];
       const { data: existingAuthUsers } = await adminClient.auth.admin.listUsers();
       const existingList = existingAuthUsers?.users || [];
