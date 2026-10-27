@@ -41,7 +41,13 @@ export function UserManagementPanel() {
   const [users, setUsers] = useState<SystemUser[]>(() => INITIAL_SYSTEM_USERS);
 
   useEffect(() => {
+    // Immediate cached display
     setUsers(UserService.getUsers());
+
+    // Live cloud synchronization
+    UserService.fetchUsers().then((liveUsers) => {
+      setUsers(liveUsers);
+    });
   }, []);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');

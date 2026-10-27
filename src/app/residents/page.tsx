@@ -18,6 +18,7 @@ import {
   FileText,
   BadgeCheck,
   Stethoscope,
+  RefreshCw,
 } from 'lucide-react';
 import { MedicalChartModal } from '@/components/clinical/medical-chart-modal';
 
@@ -28,9 +29,24 @@ export default function ResidentsDirectoryPage() {
   const [selectedBarangay, setSelectedBarangay] = useState<string>('ALL');
   const [filterPregnant, setFilterPregnant] = useState(false);
   const [chartResident, setChartResident] = useState<Resident | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const loadData = async () => {
+    setIsRefreshing(true);
+    try {
+      const data = await ResidentRegistryService.fetchResidents();
+      setResidents(data);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   useEffect(() => {
+    // Immediate cached display
     setResidents(ResidentRegistryService.getResidents());
+
+    // Live cloud synchronization
+    loadData();
   }, []);
 
   const calculateAge = (dob: string) => {
@@ -76,15 +92,27 @@ export default function ResidentsDirectoryPage() {
             </p>
           </div>
 
-          {canRegisterResidents && (
-            <Link
-              href="/residents/register"
-              className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-colors shadow-xs shrink-0"
+          <div className="flex items-center space-x-2 shrink-0">
+            <button
+              onClick={loadData}
+              disabled={isRefreshing}
+              className="inline-flex items-center space-x-2 px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors shadow-2xs disabled:opacity-50 cursor-pointer"
+              title="Synchronize registry with live Supabase database"
             >
-              <UserPlus className="w-4 h-4" />
-              <span>New Patient Intake</span>
-            </Link>
-          )}
+              <RefreshCw className={`w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>{isRefreshing ? 'Syncing...' : 'Sync Cloud'}</span>
+            </button>
+
+            {canRegisterResidents && (
+              <Link
+                href="/residents/register"
+                className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition-colors shadow-xs"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>New Patient Intake</span>
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Aggregated Demographics KPI Cards */}

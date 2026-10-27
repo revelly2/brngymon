@@ -126,6 +126,31 @@ export class UserService {
     }
   }
 
+  public static setAndPersistUsers(users: SystemUser[]): void {
+    this.saveUsers(users);
+  }
+
+  public static async fetchUsers(): Promise<SystemUser[]> {
+    if (typeof window === 'undefined') {
+      return this.inMemoryUsers || INITIAL_SYSTEM_USERS;
+    }
+
+    try {
+      const response = await fetch('/api/admin/users');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && Array.isArray(data.users) && data.users.length > 0) {
+          this.saveUsers(data.users);
+          return data.users;
+        }
+      }
+    } catch {
+      // Offline fallback
+    }
+
+    return this.getUsers();
+  }
+
   private static saveUsers(users: SystemUser[]): void {
     this.inMemoryUsers = users;
     if (typeof window !== 'undefined') {

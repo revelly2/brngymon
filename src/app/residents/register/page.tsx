@@ -43,6 +43,7 @@ export default function RegisterResidentPage() {
     matches: [],
   });
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Live deduplication check
   useEffect(() => {
@@ -54,7 +55,7 @@ export default function RegisterResidentPage() {
     }
   }, [lastName, firstName, dob]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatusMessage(null);
 
@@ -74,36 +75,46 @@ export default function RegisterResidentPage() {
       return;
     }
 
-    const reg = ResidentRegistryService.registerResident({
-      barangay,
-      purok,
-      householdNumber,
-      firstName,
-      middleName,
-      lastName,
-      suffix,
-      alias,
-      dateOfBirth: dob,
-      biologicalSex: sex,
-      civilStatus,
-      contactNumber,
-      philhealthId,
-      isPregnant,
-    });
+    setIsSubmitting(true);
+    try {
+      const reg = await ResidentRegistryService.registerResidentAsync({
+        barangay,
+        purok,
+        householdNumber,
+        firstName,
+        middleName,
+        lastName,
+        suffix,
+        alias,
+        dateOfBirth: dob,
+        biologicalSex: sex,
+        civilStatus,
+        contactNumber,
+        philhealthId,
+        isPregnant,
+      });
 
-    if (!reg.success) {
+      if (!reg.success) {
+        setStatusMessage({
+          type: 'error',
+          text: reg.error || 'Failed to register resident.',
+        });
+      } else {
+        setStatusMessage({
+          type: 'success',
+          text: `Resident enrolled successfully! Assigned UPI: ${reg.resident?.upi}`,
+        });
+        setTimeout(() => {
+          router.push('/residents');
+        }, 1500);
+      }
+    } catch (err: unknown) {
       setStatusMessage({
         type: 'error',
-        text: reg.error || 'Failed to register resident.',
+        text: err instanceof Error ? err.message : 'Unexpected error during registration.',
       });
-    } else {
-      setStatusMessage({
-        type: 'success',
-        text: `Resident enrolled successfully! Assigned UPI: ${reg.resident?.upi}`,
-      });
-      setTimeout(() => {
-        router.push('/residents');
-      }, 1500);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -417,11 +428,11 @@ export default function RegisterResidentPage() {
             </Link>
             <button
               type="submit"
-              disabled={dupResult.hasExactMatch}
-              className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-600 text-xs font-semibold text-white transition-colors flex items-center space-x-2 shadow-xs"
+              disabled={dupResult.hasExactMatch || isSubmitting}
+              className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-600 text-xs font-semibold text-white transition-colors flex items-center space-x-2 shadow-xs cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />
-              <span>Enroll Resident</span>
+              <span>{isSubmitting ? 'Saving to Cloud Registry...' : 'Enroll Resident'}</span>
             </button>
           </div>
         </form>

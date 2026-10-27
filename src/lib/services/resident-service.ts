@@ -1,5 +1,6 @@
 import { BarangayCode, BiologicalSex, Resident } from '@/types/database';
 import { generateResidentDedupKey, generateSoundex } from '@/lib/validations/clinical';
+import { createClient } from '@/utils/supabase/client';
 
 const BARANGAY_PREFIX_MAP: Record<BarangayCode, string> = {
   PALAQUIO: 'PAL',
@@ -58,6 +59,100 @@ export class ResidentRegistryService {
     } catch {
       return this.serverCache;
     }
+  }
+
+  public static async fetchResidents(): Promise<Resident[]> {
+    if (typeof window === 'undefined') {
+      return this.serverCache;
+    }
+
+    // 1. Try server API route
+    try {
+      const response = await fetch('/api/residents');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && Array.isArray(data.residents)) {
+          this.saveResidents(data.residents);
+          return data.residents;
+        }
+      }
+    } catch {}
+
+    // 2. Direct Supabase client query
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('residents')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data && data.length > 0) {
+        this.saveResidents(data as unknown as Resident[]);
+        return data as unknown as Resident[];
+      }
+    } catch {}
+
+    return this.getResidents();
+  }
+
+  public static async registerResidentAsync(
+    input: RegistrationInput
+  ): Promise<{ success: boolean; resident?: Resident; error?: string }> {
+    // 1. Try server API route
+    try {
+      const response = await fetch('/api/residents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success && data.resident) {
+        const current = this.getResidents();
+        const updated = [data.resident, ...current.filter((r) => r.id !== data.resident.id)];
+        this.saveResidents(updated);
+        return { success: true, resident: data.resident };
+      }
+    } catch {}
+
+    // 2. Direct Supabase client insert
+    try {
+      const list = this.getResidents();
+      const upi = this.generateUPI(input.barangay, list.length);
+      const soundexKey = generateResidentDedupKey(input.lastName, input.firstName, input.dateOfBirth);
+      const supabase = createClient();
+
+      const payload = {
+        upi,
+        first_name: input.firstName.trim(),
+        middle_name: input.middleName?.trim() || null,
+        last_name: input.lastName.trim(),
+        suffix: input.suffix?.trim() || null,
+        alias: input.alias?.trim() || null,
+        date_of_birth: input.dateOfBirth,
+        biological_sex: (input.biologicalSex || 'female').toLowerCase(),
+        civil_status: input.civilStatus || 'single',
+        barangay: input.barangay,
+        purok: input.purok.trim(),
+        contact_number: input.contactNumber?.trim() || null,
+        philhealth_id: input.philhealthId?.trim() || null,
+        is_pregnant: input.isPregnant,
+        soundex_key: soundexKey,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { data, error } = await supabase.from('residents').insert(payload).select().single();
+      if (!error && data) {
+        const newResident = data as unknown as Resident;
+        const current = this.getResidents();
+        const updated = [newResident, ...current.filter((r) => r.id !== newResident.id)];
+        this.saveResidents(updated);
+        return { success: true, resident: newResident };
+      }
+    } catch {}
+
+    // 3. Local offline fallback
+    return this.registerResident(input);
   }
 
   public static saveResidents(residents: Resident[]) {

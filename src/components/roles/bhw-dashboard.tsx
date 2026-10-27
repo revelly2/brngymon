@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/context/auth-context';
 import { ResidentRegistryService } from '@/lib/services/resident-service';
 import { ClinicalService } from '@/lib/services/clinical-service';
 import { evaluateVitals } from '@/lib/validations/clinical';
+import { Resident, VitalSign, ImmunizationRecord } from '@/types/database';
 import {
   UserPlus,
   Stethoscope,
@@ -18,14 +19,36 @@ import {
   AlertTriangle,
   ArrowRight,
   MapPin,
+  RefreshCw,
 } from 'lucide-react';
 import { BhwVectorAvatar } from '@/components/vectors/role-avatars';
 
 export function BhwDashboard() {
   const { user } = useAuth();
-  const residents = ResidentRegistryService.getResidents();
-  const vitals = ClinicalService.getVitals();
-  const immunizations = ClinicalService.getImmunizations();
+  const [residents, setResidents] = useState<Resident[]>(() => ResidentRegistryService.getResidents());
+  const [vitals, setVitals] = useState<VitalSign[]>(() => ClinicalService.getVitals());
+  const [immunizations, setImmunizations] = useState<ImmunizationRecord[]>(() => ClinicalService.getImmunizations());
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const syncLiveCloud = async () => {
+    setIsSyncing(true);
+    try {
+      const [freshRes, freshVit, freshImm] = await Promise.all([
+        ResidentRegistryService.fetchResidents(),
+        ClinicalService.fetchVitals(),
+        ClinicalService.fetchImmunizations(),
+      ]);
+      setResidents(freshRes);
+      setVitals(freshVit);
+      setImmunizations(freshImm);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  useEffect(() => {
+    syncLiveCloud();
+  }, []);
 
   // BHW Quick Triage Simulator State
   const [sbp, setSbp] = useState<number>(120);
@@ -72,12 +95,12 @@ export function BhwDashboard() {
   // Outreach tracker state for home visits
   const [visitedInfants, setVisitedInfants] = useState<Record<string, string>>({});
 
-  const handleRecordVitals = (e: React.FormEvent) => {
+  const handleRecordVitals = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedResidentId) return;
 
     const res = residents.find((r) => r.id === selectedResidentId);
-    ClinicalService.recordVitals({
+    const result = await ClinicalService.recordVitalsAsync({
       residentId: selectedResidentId,
       systolicBp: sbp,
       diastolicBp: dbp,
@@ -88,6 +111,10 @@ export function BhwDashboard() {
       heightCm: height,
       notes: `BHW Rapid Screener: ${evalResult.severity} (${evalResult.nutritionalStatus})`,
     });
+
+    if (result.vitalsRecord) {
+      setVitals((prev) => [result.vitalsRecord!, ...prev]);
+    }
 
     setSaveSuccessMsg(
       `Vitals logged for ${res?.first_name} ${res?.last_name}. Triage Tag: ${evalResult.severity}`

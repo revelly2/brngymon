@@ -14,18 +14,23 @@ export async function GET() {
           const matchingSeed = INITIAL_SYSTEM_USERS.find(
             (u) => u.id === p.id || u.fullName.toLowerCase() === p.full_name.toLowerCase()
           );
+          const hasEmailInContact = p.contact_number && p.contact_number.includes('@');
+          const email = hasEmailInContact
+            ? p.contact_number
+            : (matchingSeed?.email || `${p.full_name.toLowerCase().replace(/[^a-z0-9]/g, '')}@bucay.gov.ph`);
+
           return {
             id: p.id,
             fullName: p.full_name,
-            email: matchingSeed?.email || `${p.full_name.toLowerCase().replace(/[^a-z0-9]/g, '')}@bucay.gov.ph`,
+            email,
             role: p.role,
             barangay: p.barangay,
             employeeId: matchingSeed?.employeeId || p.id.slice(0, 8).toUpperCase(),
-            contactNumber: p.contact_number || undefined,
+            contactNumber: hasEmailInContact ? undefined : (p.contact_number || undefined),
             password: matchingSeed?.password || 'admin123',
             status: 'ACTIVE' as const,
             stationName: `Barangay ${p.barangay} Health Station`,
-            modules: p.modules || [],
+            modules: p.modules && p.modules.length > 0 ? p.modules : ['resident_profiling', 'resident_intake', 'vitals_triage', 'immunization_epi'],
             createdAt: p.created_at || new Date().toISOString(),
             updatedAt: p.updated_at || new Date().toISOString(),
           };

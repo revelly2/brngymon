@@ -196,8 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const cleanInput = rawInput.toLowerCase().trim();
-      const allUsers = UserService.getUsers();
-      const registeredUser = allUsers.find((u) => {
+      const matchPredicate = (u: any) => {
         const uEmail = (u.email || '').toLowerCase().trim();
         const uEmp = (u.employeeId || '').toLowerCase().trim();
         const uName = (u.fullName || '').toLowerCase().trim();
@@ -210,7 +209,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           uName === cleanInput ||
           uName.startsWith(cleanInput)
         );
-      });
+      };
+
+      let allUsers = UserService.getUsers();
+      let registeredUser = allUsers.find(matchPredicate);
+
+      // If user not in local cache, immediately fetch live cloud registry
+      if (!registeredUser) {
+        try {
+          const freshUsers = await UserService.fetchUsers();
+          registeredUser = freshUsers.find(matchPredicate);
+        } catch {}
+      }
 
       const targetEmail = registeredUser?.email || (rawInput.includes('@') ? rawInput : undefined);
 
@@ -403,7 +413,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const canEditClinicalData = hasModule('vitals_triage') || hasModule('patient_chart');
-  const canRegisterResidents = hasModule('resident_intake');
+  const canRegisterResidents =
+    hasModule('resident_intake') ||
+    hasModule('resident_profiling') ||
+    user.role === 'admin' ||
+    user.role === 'doctor' ||
+    user.role === 'nurse' ||
+    user.role === 'bhw';
   const canViewReportsOnly = user.role === 'lgu_viewer' && !hasModule('patient_chart') && !hasModule('vitals_triage');
 
   return (

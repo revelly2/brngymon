@@ -130,6 +130,62 @@ export class ClinicalService {
     }
   }
 
+  public static async fetchVitals(): Promise<VitalSign[]> {
+    if (typeof window === 'undefined') return this.serverVitals;
+    try {
+      const res = await fetch('/api/vitals');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.vitals)) {
+          this.serverVitals = data.vitals;
+          localStorage.setItem(this.VITALS_KEY, JSON.stringify(data.vitals));
+          return data.vitals;
+        }
+      }
+    } catch {}
+    return this.getVitals();
+  }
+
+  public static async recordVitalsAsync(
+    input: VitalsInput
+  ): Promise<{ success: boolean; vitalsRecord?: VitalSign; evaluation: ReturnType<typeof evaluateVitals> }> {
+    const evalResult = evaluateVitals({
+      systolicBp: input.systolicBp,
+      diastolicBp: input.diastolicBp,
+      temperatureCelsius: input.temperatureCelsius,
+      weightKg: input.weightKg,
+      heightCm: input.heightCm,
+    });
+
+    try {
+      const res = await fetch('/api/vitals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...input,
+          bmi: evalResult.bmi,
+          severity: evalResult.severity,
+          clinicalFlags: evalResult.clinicalFlags,
+          referralRecommended: evalResult.referralRecommended,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.vitalsRecord) {
+          const current = this.getVitals();
+          const updated = [data.vitalsRecord, ...current.filter((v) => v.id !== data.vitalsRecord.id)];
+          this.serverVitals = updated;
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(this.VITALS_KEY, JSON.stringify(updated));
+          }
+          return { success: true, vitalsRecord: data.vitalsRecord, evaluation: evalResult };
+        }
+      }
+    } catch {}
+
+    return this.recordVitals(input);
+  }
+
   public static recordVitals(
     input: VitalsInput,
     options?: { inMemoryList?: VitalSign[] }
@@ -222,6 +278,72 @@ export class ClinicalService {
     }
   }
 
+  public static async fetchMaternalRecords(): Promise<{ records: MaternalRecord[]; visits: AntenatalVisit[] }> {
+    if (typeof window === 'undefined') return { records: this.serverMaternal, visits: this.serverVisits };
+    try {
+      const res = await fetch('/api/maternal');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          if (Array.isArray(data.records)) {
+            this.serverMaternal = data.records;
+            localStorage.setItem(this.MATERNAL_KEY, JSON.stringify(data.records));
+          }
+          if (Array.isArray(data.visits)) {
+            this.serverVisits = data.visits;
+            localStorage.setItem(this.VISITS_KEY, JSON.stringify(data.visits));
+          }
+          return { records: data.records || [], visits: data.visits || [] };
+        }
+      }
+    } catch {}
+    return { records: this.getMaternalRecords(), visits: this.getAntenatalVisits() };
+  }
+
+  public static async enrollMaternalPatientAsync(
+    input: MaternalEnrollmentInput
+  ): Promise<{ success: boolean; record?: MaternalRecord }> {
+    const edd = calculateNaegeleEDD(input.lmp);
+    const highRiskFlags: string[] = [];
+    if (input.residentAge < 18) highRiskFlags.push('ADOLESCENT_PREGNANCY');
+    if (input.residentAge >= 35) highRiskFlags.push('ADVANCED_MATERNAL_AGE');
+    if (input.para >= 5 || input.gravida >= 5) highRiskFlags.push('GRAND_MULTIPARITY');
+
+    try {
+      const res = await fetch('/api/maternal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'enrollment',
+          residentId: input.residentId,
+          gravida: input.gravida,
+          para: input.para,
+          fullTerm: input.fullTerm,
+          preterm: input.preterm,
+          abortion: input.abortion,
+          livingChildren: input.livingChildren,
+          lmp: input.lmp,
+          edd,
+          highRiskFlags,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.record) {
+          const current = this.getMaternalRecords();
+          const updated = [data.record, ...current.filter((m) => m.id !== data.record.id)];
+          this.serverMaternal = updated;
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(this.MATERNAL_KEY, JSON.stringify(updated));
+          }
+          return { success: true, record: data.record };
+        }
+      }
+    } catch {}
+
+    return this.enrollMaternalPatient(input);
+  }
+
   public static enrollMaternalPatient(
     input: MaternalEnrollmentInput,
     options?: { inMemoryList?: MaternalRecord[] }
@@ -285,6 +407,52 @@ export class ClinicalService {
     } catch {
       return [];
     }
+  }
+
+  public static async fetchImmunizations(): Promise<ImmunizationRecord[]> {
+    if (typeof window === 'undefined') return [];
+    try {
+      const res = await fetch('/api/immunizations');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.immunizations)) {
+          this.serverImmunizations = data.immunizations;
+          localStorage.setItem(this.IMMUNIZATION_KEY, JSON.stringify(data.immunizations));
+          return data.immunizations;
+        }
+      }
+    } catch {}
+    return this.getImmunizations();
+  }
+
+  public static async recordImmunizationAsync(input: {
+    residentId: string;
+    vaccineCode: string;
+    doseNumber?: number;
+    status?: string;
+    batchNumber?: string;
+    notes?: string;
+  }): Promise<{ success: boolean; immunization?: ImmunizationRecord }> {
+    try {
+      const res = await fetch('/api/immunizations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.immunization) {
+          const current = this.getImmunizations();
+          const updated = [data.immunization, ...current.filter((i) => i.id !== data.immunization.id)];
+          this.serverImmunizations = updated;
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(this.IMMUNIZATION_KEY, JSON.stringify(updated));
+          }
+          return { success: true, immunization: data.immunization };
+        }
+      }
+    } catch {}
+    return { success: false };
   }
 
   /**
